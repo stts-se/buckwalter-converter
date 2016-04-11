@@ -1,5 +1,5 @@
 # buckwalter-converter
-A javascript component for converting between Arabic and Buckwalter transliteration
+A javascript component for converting between Arabic text and Buckwalter transliteration
 
 References:
   * http://www.qamus.org/transliteration.htm
