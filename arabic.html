@@ -1,0 +1,58 @@
+<html>
+  <meta charset="utf-8">
+  <head>
+    <title>Arabic transliteration</title>
+  </head>
+  <body>
+    
+    <h1>Arabic transliteration tool</h1>
+
+    <em>Reference: <a href="http://www.qamus.org/transliteration.htm">qamus.org/transliteration.htm</a></em>
+
+    <div>
+      <table style="padding: 20">
+
+	<tr>
+	  <td><span style="font-size:140%;">Buckwalter</span></td>&nbsp;&nbsp;</td>
+	  <td>
+	    <input id="bwEdit" style="font-size:160%;" data-bind="visible: bwEditing(), textInput: buckwalterEdit, hasFocus: true"></input>
+	    <input id="bwView" style="color: gray; font-size:160%;" readonly="readonly" data-bind="click: setBwEditing, visible: !bwEditing(), textInput: buckwalterView"></input>
+	  </td>
+	</tr>
+	<tr>
+	  <td><span style="font-size:140%;">Arabic</span></td>
+	  <td>
+	    <input dir="rtl" id="araEdit" style="line-height: 200%; font-size:160%;" data-bind="visible: !bwEditing(), textInput: arabicEdit"></input>
+	    <input dir="rtl" id="araView" style="line-height: 200%; color: gray; font-size:160%;" readonly="readonly" data-bind="click: setAraEditing, visible: bwEditing(), textInput: arabicView"></input>
+	  </td>
+	</tr>
+
+      </table>
+    </div>
+
+   <p class="Maptable">
+      <div>
+   	<b>Show/hide maptable</b> <input type="checkbox" data-bind="checked: showMapTable"/>
+   	<table data-bind="visible: showMapTable">
+   	  <thead>
+   	    <tr><td><b>Buckwalter</b></td><td><b>Arabic</td></tr>
+   	  </thead>
+   	  <tbody data-bind="foreach: bw2araObservableMap()">
+   	    <tr>
+   	      <td><span data-bind="text: $data[0]"></span></td>
+   	      <td><span data-bind="text: $data[1]"></span></td>
+   	    </tr>
+   	  </tbody>
+   	</table>
+      </div>
+    </p>
+
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script src="http://underscorejs.org/underscore-min.js"></script> 
+    <script src="http://momentjs.com/downloads/moment-with-locales.js"></script>
+    <script src="./arabic.js"></script>
+    
+  </body>
+</html>
