@@ -106,7 +106,6 @@ function bw2ara(bw) {
 	if (sym.length> 0 && ara === undefined || ara === null) {
 	    console.log("No mapping for bw symbol /" + sym + "/");
 	    return "?";
-	    //messages.push("Format: No mapping for bw symbol /" + sym + "/");
 	}
 	else {
 	    return ara;
@@ -122,7 +121,6 @@ function ara2bw(ara) {
 	if (sym.length> 0 && bw === undefined || bw === null) {
 	    console.log("No mapping for ara symbol /" + sym + "/");
 	    return "?";
-	    //messages.push("Format: No mapping for bw symbol /" + sym + "/");
 	}
 	else {
 	    return bw;
