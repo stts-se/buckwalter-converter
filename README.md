@@ -15,7 +15,7 @@ References:
   * https://en.wikipedia.org/wiki/Romanization_of_Persian
 
 
-## Dependencies:
+## Dependencies
 
   * knockout http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js
   * underscore http://underscorejs.org/underscore-min.js
