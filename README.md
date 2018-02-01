@@ -1,5 +1,4 @@
-# buckwalter-converter
-A javascript component for transliteration of Arabic and Farsi text
+Javascript components for transliteration of Arabic and Farsi text
 
 
 ## Arabic | Buckwalter
