@@ -1,0 +1,60 @@
+<html>
+  <meta charset="utf-8">
+  <head>
+    <title>Farsi transliteration</title>
+  </head>
+  <body>
+    
+    <h1>Farsi transliteration tool</h1>
+
+    Experimental!
+
+    <em>Reference: <a href="https://en.wikipedia.org/wiki/Romanization_of_Persian">en.wikipedia.org/wiki/Romanization_of_Persian</a> EI (2012)</em>
+
+    <div>
+      <table style="padding: 20">
+
+	<tr>
+	  <td><span style="font-size:140%;">Latin</span></td>&nbsp;&nbsp;</td>
+	  <td>
+	    <input id="latEdit" style="font-size:160%;" data-bind="visible: latEditing(), textInput: latinEdit, hasFocus: true"></input>
+	    <input id="latView" style="color: gray; font-size:160%;" readonly="readonly" data-bind="click: setLatEditing, visible: !latEditing(), textInput: latinView"></input>
+	  </td>
+	</tr>
+	<tr>
+	  <td><span style="font-size:140%;">Farsi</span></td>
+	  <td>
+	    <input dir="rtl" id="farEdit" style="line-height: 200%; font-size:160%;" data-bind="visible: !latEditing(), textInput: farsiEdit"></input>
+	    <input dir="rtl" id="farView" style="line-height: 200%; color: gray; font-size:160%;" readonly="readonly" data-bind="click: setFarEditing, visible: latEditing(), textInput: farsiView"></input>
+	  </td>
+	</tr>
+
+      </table>
+    </div>
+
+   <p class="Maptable">
+      <div>
+   	<b>Show/hide maptable</b> <input type="checkbox" data-bind="checked: showMapTable"/>
+   	<table data-bind="visible: showMapTable">
+   	  <thead>
+   	    <tr><td><b>Farsi</b></td><td><b>Latin</td></tr>
+   	  </thead>
+   	  <tbody data-bind="foreach: far2latObservableMap()">
+   	    <tr>
+   	      <td><span data-bind="text: $data[0]"></span></td>
+   	      <td><span data-bind="text: $data[1]"></span></td>
+   	    </tr>
+   	  </tbody>
+   	</table>
+      </div>
+    </p>
+
+    <script type="text/javascript" src="http://ajax.aspnetcdn.com/ajax/knockout/knockout-3.3.0.js"></script>
+    <script src="http://underscorejs.org/underscore-min.js"></script> 
+<!--    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>-->
+<!--    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>-->
+<!--    <script src="http://momentjs.com/downloads/moment-with-locales.js"></script> -->
+    <script src="./farsi-converter.js"></script>
+    
+  </body>
+</html>
