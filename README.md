@@ -1,7 +1,9 @@
-Javascript components for transliteration of Arabic and Farsi text
+Utilities for transliteration of Arabic and Farsi text
 
 
 ## Arabic | Buckwalter
+
+Javascript and Python (python3)
 
 References:
   * http://www.qamus.org/transliteration.htm
@@ -9,6 +11,8 @@ References:
 
 
 ## Farsi | EI (2012)
+
+Javascript
 
 References:
   * https://en.wikipedia.org/wiki/Romanization_of_Persian
