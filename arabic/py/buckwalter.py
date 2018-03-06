@@ -88,7 +88,8 @@ def b2a(string):
     return convert(string,b2aMap)
 
 def help():
-    print (cmdname + " [--reverse] <inputfiles>", file=sys.stderr)
+    print (cmdname + " [-r] <input files>", file=sys.stderr)
+    print (" -r for reverse conversion (optional)", file=sys.stderr)
     return
 
 activeMap = a2bMap
