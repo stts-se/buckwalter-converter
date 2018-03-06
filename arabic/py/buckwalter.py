@@ -1,6 +1,5 @@
 import re
-from sys import stderr
-from sys import argv
+import sys
 import getopt
 
 a2bMap = {
@@ -88,23 +87,33 @@ def a2b(string):
 def b2a(string):
     return convert(string,b2aMap)
 
+def help():
+    print (cmdname + " [--reverse] <inputfiles>", file=sys.stderr)
+    return
+
 activeMap = a2bMap
 
+cmdname=sys.argv[0]
+
 try:
-    opts, args = getopt.getopt(argv[1:], 'r')
+    opts, args = getopt.getopt(sys.argv[1:], 'r')
 except getopt.GetoptError as err:
-    print(err, file=sdtderr)
-    print (cmdname.py + "[--reverse] <inputfiles>", file=stderr)
+    print(err, file=sys.stderr)
+    help()
     sys.exit(2)
     
 for opt, arg in opts:
     if opt == '-h':
-        print (cmdname.py + "[--reverse] <inputfiles>", file=stderr)
+        help()
         sys.exit()
     elif opt in ("-r"):
         activeMap = b2aMap
         
-
+if cmdname == "buckwalter.py" and len(args) == 0:
+    help()
+    sys.exit(1)
+    
+        
 for fn in args:
     with open(fn) as f:
         for l in f.readlines():
