@@ -1,46 +1,145 @@
-ا	A
-ب	b
-ت	t
-ث	v
-ج	j
-ح	H
-خ	x
-د	d
-ذ	*
-ر	r
-ز	z
-س	s
-ش	$
-ص	S
-ض	D
-ط	T
-ظ	Z
-ع	E
-غ	g
-ف	f
-ق	q
-ك	k
-ل	l
-م	m
-ن	n
-ه	h
-و	w
-ي	y
-ة	p
-َ	a
-ُ	u
-ِ	i
-ً	F
-ٌ	N
-ٍ	K
-ّ	~
-ْ	o
-ء	'
-أ	>
-إ	<
-ؤ	&
-ئ	}
-آ	|
-ٱ	{
-ٰ	`
-ى	Y
+ا
+A
+
+ب
+b
+
+ت
+t
+
+ث
+v
+
+ج
+j
+
+ح
+H
+
+خ
+x
+
+د
+d
+
+ذ
+*
+
+ر
+r
+
+ز
+z
+
+س
+s
+
+ش
+$
+
+ص
+S
+
+ض
+D
+
+ط
+T
+
+ظ
+Z
+
+ع
+E
+
+غ
+g
+
+ف
+f
+
+ق
+q
+
+ك
+k
+
+ل
+l
+
+م
+m
+
+ن
+n
+
+ه
+h
+
+و
+w
+
+ي
+y
+
+ة
+p
+
+َ
+a
+
+ُ
+u
+
+ِ
+i
+
+ً
+F
+
+ٌ
+N
+
+ٍ
+K
+
+ّ
+~
+
+ْ
+o
+
+ء
+'
+
+أ
+>
+
+إ
+<
+
+ؤ
+&
+
+ئ
+}
+
+آ
+|
+
+ٱ
+{
+
+ٰ
+`
+
+ى
+Y
+
+
+
+#يُولَدُ جَمِيعُ ٱلنَّاسِ أَحْرَارًا مُتَسَاوِينَ فِي ٱلْكَرَامَةِ وَٱلْحُقُوقِ. وَقَدْ وُهِبُوا عَقْلًا وَضَمِيرًا وَعَلَيْهِمْ أَنْ يُعَامِلَ بَعْضُهُمْ بَعْضًا بِرُوحِ ٱلْإِخَاءِ.
+#yuwladu jamiyEu {ln~aAsi >aHoraArFA mutasaAwiyna fiy {lokaraAmapi wa{loHuquwqi. waqado wuhibuwA EaqolFA waDamiyrFA waEalayohimo >ano yuEaAmila baEoDuhumo baEoDFA biruwHi {lo<ixaA'i.
+
+لنَّا
+ln~aA

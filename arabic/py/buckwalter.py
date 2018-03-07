@@ -4,6 +4,8 @@ import getopt
 import unicodedata
 
 cmdname=sys.argv[0]
+convertNumbers = False
+force = False
 
 # http://www.qamus.org/transliteration.htm
 #  To make it XML-friendly I would:
@@ -107,7 +109,7 @@ def printMapTable():
         print("{}\t{}\t{}\t{}".format(a, ucode, uname, b))
     return
 
-def test(inputString, outputString, mapTable):
+def reverseTest(inputString, outputString, mapTable):
     testTable = None
     if mapTable == a2bMap:
         testTable = b2aMap
@@ -115,15 +117,13 @@ def test(inputString, outputString, mapTable):
         testTable = a2bMap
     else:
         raise ValueError('unknown activeMap (neither a2bMap nor b2aMap)!')
-        sys.exit(2)
 
-    reverseString = convert(outputString, testTable)
+    norm, reverseString, msg, ok = convert(outputString,testTable,False)
     if reverseString != inputString:
-        print("conversion test failed! {} {}".format(inputString, outputString), file=stderr)
-        return False
+        err = "Reversed: {}".format(reverseString)
+        return err, False
     else:
-        return True   
-    return False
+        return "", True
 
 def is_common_char(char):
     unum = ord(char)
@@ -138,9 +138,27 @@ def is_common_char(char):
         return False
     return
 
-# convert returns (1) the converted string, and (2) a boolean status (True if the conversion is ok, False if there was an error)
-def convert(string, mapTable, convertNumbers):
+def normalise_bw(buckwalter):
+    norm = buckwalter
+    norm = norm.replace("a~","~a")
+    norm = norm.replace("i~","~i")
+    norm = norm.replace("u~","~u")
+    return norm
+
+def normalise_ar(arabic):
+    norm = arabic
+    norm = norm.replace("\u064E\u0651","\u0651\u064E")
+    norm = norm.replace("\u0650\u0651","\u0651\u0650")
+    norm = norm.replace("\u064f\u0651","\u0651\u064f")    
+    return norm
+
+def normalise(orth): # TODO: UGLY!!
+    return normalise_bw(normalise_ar(orth))
+
+def convert(string, mapTable, doReverseTest=True):
+    norm = normalise(string)
     res = ""
+    msg = ""
     ok = True
     for ch in string:
         if ch in arabicIndicDigits and not(convertNumbers):
@@ -148,38 +166,42 @@ def convert(string, mapTable, convertNumbers):
         else:
             ch2 = mapTable.get(ch,"")
             if ch2 == "":
-                if is_common_char(ch):
-                    res = res + ch
-                else:
-                    res = res + "<UNKNOWN_CHAR:%s>" % ch
+                res = res + ch                        
+                if not is_common_char(ch):
                     ok = False
+                    msg = "Unknown char: %s" % ch
             else:
                 res = res + ch2
-    return res, ok
 
-def a2b(string, convertNumbers):
-    return convert(string,a2bMap,convertNumbers)
+    if ok and doReverseTest:
+        msg, ok = reverseTest(norm, res, mapTable)
+    return norm, res, msg, ok
 
-def b2a(string, convertNumbers):
-    return convert(string,b2aMap,convertNumbers)
+def a2b(string):
+    return convert(string,a2bMap)
+
+def b2a(string):
+    return convert(string,b2aMap)
 
 
 def help():
     print("* Convert Arabic<=>Buckwalter:", file=sys.stderr)
-    print("  " + cmdname + " [-r] <input files>", file=sys.stderr)
+    print("  " + cmdname + " [option] <input files>", file=sys.stderr)
     print("   -r for reverse conversion (optional, default: false)", file=sys.stderr)
     print("   -n convert arabic-indic numbers to arabic (optional, default: false)", file=sys.stderr)
+    print("   -f force, to fail on error (optional, default: false)", file=sys.stderr)
     print("", file=sys.stderr)
     print("* Print map table:", file=sys.stderr)
     print("  " + cmdname + " -p", file=sys.stderr)
     return
 
-def main(): 
-    activeMap = a2bMap
-    convertNumbers = False
+
+def main():        
     
+    activeMap = a2bMap
+
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'rpn')
+        opts, args = getopt.getopt(sys.argv[1:], 'rpnf')
     except getopt.GetoptError as err:
         print(err, file=sys.stderr)
         help()
@@ -194,22 +216,26 @@ def main():
             sys.exit()
         elif opt in ("-r"):
             activeMap = b2aMap
-        elif opt in ("-nx"):
+        elif opt in ("-n"):
             convertNumbers = True
+        elif opt in ("-f"):
+            force = True
         
     if len(args) == 0:
         help()
         sys.exit(1)
             
     for fn in args:
-        with open(fn) as f:
+        with open(fn, encoding="utf-8") as f:
             for l in f.readlines():
                 l = l.rstrip()
-                conv, ok = convert(l,activeMap,convertNumbers)
+                norm, conv, msg, ok = convert(l, activeMap)
                 if ok:
-                    print("OK\t" + l + "\t" + conv)
+                    print(l + "\t" + conv)
+                elif force:
+                    print(l + "\t" + conv)
                 else:
-                    print("FAIL\t" + l + "\t" + conv)
+                    print("CONVERSION FAILED\t" + msg + "\t" + l + "\t" + conv, file=sys.stderr)
     return
 
           
