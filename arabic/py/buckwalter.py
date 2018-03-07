@@ -3,35 +3,35 @@ import sys
 import getopt
 
 a2bMap = {
-    "ا": "A",
-    "ب": "b",
-    "ت": "t",
-    "ث": "v",
-    "ج": "j",
-    "ح": "H",
-    "خ": "x",
-    "د": "d",
-    "ذ": "*",
-    "ر": "r",
-    "ز": "z",
-    "س": "s",
-    "ش": "$",
-    "ص": "S",
-    "ض": "D",
-    "ط": "T",
-    "ظ": "Z",
-    "ع": "E",
-    "غ": "g",
-    "ف": "f",
-    "ق": "q",
-    "ك": "k",
-    "ل": "l",
-    "م": "m",
-    "ن": "n",
-    "ه": "h",
-    "و": "w",
-    "ي": "y",
-    "ة": "p", #teh marbuta
+    "\u0627": "A",
+    "\u0628": "b",
+    "\u062A": "t",
+    "\u062B": "v",
+    "\u062C": "j",
+    "\u062D": "H",
+    "\u062E": "x",
+    "\u062F": "d",
+    "\u0630": "*",
+    "\u0631": "r",
+    "\u0632": "z",
+    "\u0633": "s",
+    "\u0634": "$",
+    "\u0635": "S",
+    "\u0636": "D",
+    "\u0637": "T",
+    "\u0638": "Z",
+    "\u0639": "E",
+    "\u063A": "g",
+    "\u0641": "f",
+    "\u0642": "q",
+    "\u0643": "k",
+    "\u0644": "l",
+    "\u0645": "m",
+    "\u0646": "n",
+    "\u0647": "h",
+    "\u0648": "w",
+    "\u064A": "y",
+    "\u0629": "p", #teh marbuta
 
     "\u064E": "a", # fatha
     "\u064f": "u", # damma
@@ -54,7 +54,16 @@ a2bMap = {
     "\u0649": "Y", # alif maqsura
 }
 
-b2aMap = {v: k for k, v in a2bMap.items()}
+b2aMap = {b: a for a, b in a2bMap.items()}
+
+def printMapTable():
+    import unicodedata
+    print("{}\t{}\t{}\t{}".format("ARABIC", "UNICODE", "UNICODE NAME", "BUCKWALTER"))
+    for a, b in a2bMap.items():
+        ucode = 'U+%04x' % ord(a)
+        udesc = unicodedata.name(a)
+        print("{}\t{}\t{}\t{}".format(a, ucode, udesc, b))
+    return
 
 def test(inputString, outputString, mapTable):
     testTable = None
@@ -87,39 +96,50 @@ def a2b(string):
 def b2a(string):
     return convert(string,b2aMap)
 
-def help():
-    print (cmdname + " [-r] <input files>", file=sys.stderr)
-    print (" -r for reverse conversion (optional)", file=sys.stderr)
-    return
-
-activeMap = a2bMap
-
 cmdname=sys.argv[0]
 
-try:
-    opts, args = getopt.getopt(sys.argv[1:], 'r')
-except getopt.GetoptError as err:
-    print(err, file=sys.stderr)
-    help()
-    sys.exit(2)
-    
-for opt, arg in opts:
-    if opt == '-h':
+def help():
+    print("* Convert Arabic<=>Buckwalter:", file=sys.stderr)
+    print("  " + cmdname + " [-r] <input files>", file=sys.stderr)
+    print("   -r for reverse conversion (optional)", file=sys.stderr)
+    print("", file=sys.stderr)
+    print("* Print map table:", file=sys.stderr)
+    print("  " + cmdname + " -p", file=sys.stderr)
+    return
+
+def main(): 
+    activeMap = a2bMap
+
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'rp')
+    except getopt.GetoptError as err:
+        print(err, file=sys.stderr)
         help()
-        sys.exit()
-    elif opt in ("-r"):
-        activeMap = b2aMap
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            help()
+            sys.exit()
+        elif opt in ("-p"):
+            printMapTable()
+            sys.exit()
+        elif opt in ("-r"):
+            activeMap = b2aMap
         
-if cmdname == "buckwalter.py" and len(args) == 0:
-    help()
-    sys.exit(1)
-    
-        
-for fn in args:
-    with open(fn) as f:
-        for l in f.readlines():
-            l = l.rstrip()
-            conv = convert(l,activeMap)
-            print(l + "\t" + conv)
+    if len(args) == 0:
+        help()
+        sys.exit(1)
+            
+    for fn in args:
+        with open(fn) as f:
+            for l in f.readlines():
+                l = l.rstrip()
+                conv = convert(l,activeMap)
+                print(l + "\t" + conv)
+
+    return
 
           
+if __name__ == "__main__":
+    main()
