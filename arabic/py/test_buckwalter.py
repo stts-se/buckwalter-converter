@@ -2,79 +2,106 @@ import buckwalter
 import sys
 import re
 
+cmdname = "test_buckwalter" # sys.argv[0]
+do_debug = False
+
 ## TODO: Add tests to check for expected fails (non-ascii characters that couldn't be converted)!
 
-with open("test_data/test_a2b.txt", encoding="utf-8") as f:  
-    for l in re.split("\n\n+", f.read()):
-        l = l.rstrip()
-        if l.strip() == "":
-            continue
-        if l.strip().startswith("#"):
-            print("SKIPPING:\n" + l, file=sys.stderr)
-            continue
-        fs = list(filter(None, l.split("\n")))
-        a = fs[0]
-        b = fs[1]
-        
-        buckwalter.convertNumbers = True
-        bn, a2, msg1, ok1 = buckwalter.b2a(b)
-        an, b2, msg2, ok2 = buckwalter.a2b(a)
-        buckwalter.convertNumbers = False
-        bn, a2x, msg3, ok3 = buckwalter.b2a(b)
-        an, b2x, msg4, ok4 = buckwalter.a2b(a)
+def debug(string):
+    if do_debug:
+        if string == "":
+            print("", file=sys.stderr)
+        else:
+            print("[%s] %s" % (cmdname, string), file=sys.stderr)
 
-        if a2 != an:
-            print("FAIL a2b (1)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(bn, a, a2), file=sys.stderr)
-        elif b2 != bn:
-            print("FAIL a2b (2)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(an, b, b2), file=sys.stderr)
-        elif a2x != an:
-            print("FAIL a2b (3)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(bn, a, a2x), file=sys.stderr)
-        elif b2x != bn:
-            print("FAIL a2b (4)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(an, b, b2x), file=sys.stderr)
-        elif not ok1:
-            print("FAIL a2b (5) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg1, bn, a, a2), file=sys.stderr)
-        elif not ok2:
-            print("FAIL a2b (6) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg2, an, b, b2), file=sys.stderr)
-        elif not ok3:
-            print("FAIL a2b (7) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg3, bn, a, a2x), file=sys.stderr)
-        elif not ok4:
-            print("FAIL a2b (8) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg4, an, b, b2x), file=sys.stderr)
+def test_single(file_mode, test_mode, test_no, input_orig, input_norm, expect, cfg):
+                    
+            res = buckwalter.convert(input_orig, cfg)
 
+            #debug("type: " + cfg.type())
+            #debug("input_orig: " + input_orig)
+            #debug("input_norm: " + input_norm)
+            #debug("expect: " + expect)
+            #debug("result: " + res.result)
 
+            input_orig_ucode = buckwalter.unicode_list(input_orig)
+            input_norm_ucode = buckwalter.unicode_list(input_norm)
+            expect_ucode = buckwalter.unicode_list(expect)
+            result_ucode = buckwalter.unicode_list(res.result)
+
+            info = "%s #%s | %s\ninput orig\t%s\t%s\ninput norm\t%s\t%s\nexpected\t%s\t%s\nfound    \t%s\t%s\n" % (file_mode, test_no, test_mode, input_orig, input_orig_ucode, input_norm, input_norm_ucode, expect, expect_ucode, res.result, result_ucode)
             
-with open("test_data/test_b2a.txt", encoding="utf-8") as f:
-    convertNumbers = True
-    for l in re.split("\n\n+", f.read()):
-        l = l.rstrip()
-        if l.strip() == "":
-            continue
-        if l.strip().startswith("#"):
-            print("SKIPPING\t" + l, file=sys.stderr)
-            continue
-        fs = list(filter(None, l.split("\n")))
-        b = fs[0]
-        a = fs[1]
+            if res.result == expect:
+            #    print("SUCC: " + info, file=sys.stderr)
+                return True
+            else:                
+                print("FAIL: " + info, file=sys.stderr)
+                return False
 
-        buckwalter.convertNumbers = True
-        bn, a2, msg1, ok1 = buckwalter.b2a(b)
-        an, b2, msg2, ok2 = buckwalter.a2b(a)
-        buckwalter.convertNumbers = False
-        bn, a2x, msg3, ok3 = buckwalter.b2a(b)
-        an, b2x, msg4, ok4 = buckwalter.a2b(a)
 
-        if a2 != an:
-            print("FAIL b2a (1)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(bn, a, a2), file=sys.stderr)
-        elif b2 != bn:
-            print("FAIL b2a (2)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(an, b, b2), file=sys.stderr)
-        elif a2x != an:
-            print("FAIL b2a (3)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(bn, a, a2x), file=sys.stderr)
-        elif b2x != bn:
-            print("FAIL b2a (4)\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(an, b, b2x), file=sys.stderr)
-        elif not ok1:
-            print("FAIL b2a (5) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg1, bn, a, a2), file=sys.stderr)
-        elif not ok2:
-            print("FAIL b2a (6) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg2, an, b, b2), file=sys.stderr)
-        elif not ok3:
-            print("FAIL b2a (7) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg3, bn, a, a2x), file=sys.stderr)
-        elif not ok4:
-            print("FAIL b2a (8) {}\nfrom\t{}\nexpected\t{}\nfound\t{}\n".format(msg4, an, b, b2x), file=sys.stderr)
+def test_file(input_file, cfg):
+    file_mode = cfg.type()
+    ar_index = 0
+    bw_index = 1
+    if cfg.reverse:
+        ar_index = 1
+        bw_index = 0
+
+    test_no = 0
+    n_errs = 0
+    n_tests = 0
+    with open(input_file, encoding="utf-8") as f:        
+        for l in re.split("\n\n+", f.read()):
+            test_no+=1
+            l = l.rstrip()
+            if l.strip() == "":
+                continue
+            if l.strip().startswith("#"):
+                #print("SKIPPING:\n" + l, file=sys.stderr)
+                continue
+            fs = list(filter(None, l.split("\n")))
+            
+            a0 = fs[ar_index]
+            b0 = fs[bw_index]
+            a0norm = a0
+            b0norm = b0
+            if ar_index == 0:
+                a0norm = buckwalter.normalise_ar_input(a0norm)
+            if bw_index == 0:
+                b0norm = buckwalter.normalise_bw_input(b0norm)
+
+            debug("")
+            debug("ari %s" % ar_index)
+            debug("bwi %s" % bw_index)
+            debug("a0 %s" % a0)
+            debug("b0 %s" % b0)
+
+            ok1=True
+            ok2=True
+            if ar_index == 0:                
+                ok1=test_single(file_mode, "plain", test_no, a0, a0norm, b0norm, cfg.copy_with_reverse(False))
+                ok2=test_single(file_mode, "reverse", test_no, b0, b0norm, a0norm, cfg.copy_with_reverse(True))
+            else:
+                ok1=test_single(file_mode, "plain", test_no, b0, b0norm, a0norm, cfg.copy_with_reverse(True))
+                ok2=test_single(file_mode, "reverse", test_no, a0, a0norm, b0norm, cfg.copy_with_reverse(False))
+
+            n_tests+=2
+            if not ok1:
+                n_errs+=1
+            if not ok2:
+                n_errs+=1
+
+
+    print("input file %s" % (input_file), file=sys.stderr)
+    print("%s tests run" % (n_tests), file=sys.stderr)
+    print("%s tests ok" % (n_tests-n_errs), file=sys.stderr)
+    print("%s tests fail" % (n_errs), file=sys.stderr)
+    print("", file=sys.stderr)
+    
+quiet = False
+            
+test_file("test_data/test_a2b.txt", buckwalter.Config(convertNumbers = False, reverse = False, quiet = quiet))
+test_file("test_data/test_a2b.txt", buckwalter.Config(convertNumbers = True, reverse = False, quiet = quiet))
+
+test_file("test_data/test_b2a.txt", buckwalter.Config(convertNumbers = False, reverse = True, quiet = quiet))
+test_file("test_data/test_b2a.txt", buckwalter.Config(convertNumbers = True, reverse = True, quiet = quiet))

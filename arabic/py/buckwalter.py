@@ -3,10 +3,49 @@ import sys
 import getopt
 import unicodedata
 
-cmdname=sys.argv[0]
-convertNumbers = False
-force = False
+cmdname = "buckwalter"
+do_debug = False
 
+class Config:
+    convertNumbers = True  # Convert Arabic-Indian numerals
+    reverse = False        # reverse = Buckwalter to Arabic conversion
+    quiet = False          # quiet = no errors or warnings are printed
+
+    def to_string(self):
+        return "config: {convertNumbers=%s, reverse=%s, quiet=%s}" % (self.convertNumbers, self.reverse, self.quiet)
+
+    def type(self):
+        if self.reverse:
+            return "b2a"
+        else:
+            return "a2b"
+
+    def copy_with_reverse(self, reverse):
+        cp = self.copy()
+        cp.reverse = reverse
+        return cp
+        
+    def copy(self):
+        cp = Config()
+        cp.convertNumbers = self.convertNumbers
+        cp.reverse = self.reverse
+        cp.quiet = self.quiet
+        return cp
+
+    def __init__(self, convertNumbers = False, reverse = False, quiet = False):
+        self.convertNumbers = convertNumbers
+        self.reverse = reverse
+        self.quiet = quiet
+        
+    
+class Result:
+    input = ""       # Input string
+    input_norm = ""  # Normalised input string
+    result = ""      # Converted string
+    msg = ""         # Error message, if any
+    ok = True        # Conversion success True/False
+    
+    
 # http://www.qamus.org/transliteration.htm
 #  To make it XML-friendly I would:
 #  * replace < with I (for hamza-under-alif)
@@ -102,86 +141,131 @@ arabicIndicDigits = [
 b2aMap = {b: a for a, b in a2bMap.items()}
 
 def printMapTable():
-    print("{}\t{}\t{}\t{}".format("ARABIC", "UNICODE", "UNICODE NAME", "BUCKWALTER"))
+    print("%s\t%s\t%s\t%s" % ("ARABIC", "UNICODE", "UNICODE NAME", "BUCKWALTER"))
     for a, b in a2bMap.items():
         ucode = 'U+%04x' % ord(a)
         uname = unicodedata.name(a)
-        print("{}\t{}\t{}\t{}".format(a, ucode, uname, b))
+        print("%s\t%s\t%s\t%s" % (a, ucode, uname, b))
     return
 
-def reverseTest(inputString, outputString, mapTable):
-    testTable = None
-    if mapTable == a2bMap:
-        testTable = b2aMap
-    elif mapTable == b2aMap:
-        testTable = a2bMap
+def reverseTest(testRes, cfg):
+    cfgRev = cfg.copy()
+    if cfgRev.reverse:
+        cfgRev.reverse = False
     else:
-        raise ValueError('unknown activeMap (neither a2bMap nor b2aMap)!')
-
-    norm, reverseString, msg, ok = convert(outputString,testTable,False)
-    if reverseString != inputString:
-        err = "Reversed: {}".format(reverseString)
+        cfgRev.reverse = True
+    rev = convert(testRes.result, cfgRev, isInnerCall = True)
+    if rev.result != testRes.input_norm:
+        err = "Reverse test failed!\tReverse %s != Norm %s (Original input %s)" % (rev.result, testRes.input_norm, testRes.input)
         return err, False
     else:
         return "", True
 
-def is_common_char(char):
+def unicode_list(string):
+    res = ""
+    for ch in string:
+        try:
+            uc = ('U+%04x' % ord(ch))
+        except getopt.GetoptError as err:
+            print("error for char '%s' : %s" % (ch, err), file=sys.stderr)
+            help()
+            sys.exit(2)
+
+        res = res + " " + uc
+    return res.rstrip()
+
+
+def is_common_char(char, cfg):
     unum = ord(char)
     if unum < 128: # ASCII
         return True
     elif char == "\u060c": # ARABIC COMMA
         return True
     else:
-        ucode = 'U+%04x' % ord(char)
-        udesc = unicodedata.name(char)
-        print("[{}] WARNING - CANNOT CONVERT\t{}\t{}\t{}".format(cmdname, char, udesc, ucode), file=sys.stderr)
         return False
     return
 
-def normalise_bw(buckwalter):
-    norm = buckwalter
+def normalise_bw_input(string):
+    norm = string
     norm = norm.replace("a~","~a")
     norm = norm.replace("i~","~i")
     norm = norm.replace("u~","~u")
+    debug("bw norm: %s => %s" % (string, norm))
     return norm
 
-def normalise_ar(arabic):
-    norm = arabic
+def normalise_ar_input(string):
+    norm = string
     norm = norm.replace("\u064E\u0651","\u0651\u064E")
     norm = norm.replace("\u0650\u0651","\u0651\u0650")
     norm = norm.replace("\u064f\u0651","\u0651\u064f")    
+    debug("ar norm input:\t%s\t%s"% (string, unicode_list(string)))
+    debug("ar norm output\t%s\t%s" % (norm, unicode_list(norm)))
     return norm
 
-def normalise(orth): # TODO: UGLY!!
-    return normalise_bw(normalise_ar(orth))
+def normalise_input(orth, cfg):
+    if cfg.reverse:
+        return normalise_bw_input(orth)
+    else:
+        return normalise_ar_input(orth)        
 
-def convert(string, mapTable, doReverseTest=True):
-    norm = normalise(string)
-    res = ""
-    msg = ""
+def mapTable(cfg):
+    # debug(cfg.type())
+    # debug(cfg.reverse)
+    if cfg.reverse:
+        return b2aMap
+    else:
+        return a2bMap
+    
+def convert(string, cfg, isInnerCall=False):
+    debug(cfg.type())
+    if not isInnerCall:
+        debug("convert: config type = %s" % (cfg.type()))
+    result = Result()
+    result.input_norm = normalise_input(string, cfg)
+    acc = ""
     ok = True
-    for ch in string:
-        if ch in arabicIndicDigits and not(convertNumbers):
-            res = res + ch
+    for ch in result.input_norm:
+        if ch in arabicIndicDigits and not(cfg.convertNumbers):
+            acc = acc + ch
         else:
-            ch2 = mapTable.get(ch,"")
+            debug("CFG TYPE: " + cfg.type())
+            #debug("MAPTABLE %s" % (mapTable(cfg)))
+            ch2 = mapTable(cfg).get(ch,"")
             if ch2 == "":
-                res = res + ch                        
-                if not is_common_char(ch):
-                    ok = False
-                    msg = "Unknown char: %s" % ch
+                acc = acc + ch                        
+                if not is_common_char(ch, cfg):
+                    result.ok = False
+                    ucode = 'U+%04x' % ord(ch)
+                    result.msg=("Unknown input symbol: %s (%s)" % (ch, ucode))
             else:
-                res = res + ch2
+                acc = acc + ch2
 
-    if ok and doReverseTest:
-        msg, ok = reverseTest(norm, res, mapTable)
-    return norm, res, msg, ok
+    result.result = acc
+    if ok and isInnerCall:
+        msg, ok = reverseTest(result, cfg)
+    return result
 
-def a2b(string):
-    return convert(string,a2bMap)
+def a2b(string, cfg):
+    thisCfg = cfg.copy()
+    thisCfg.reverse = False
+    #debug("a2b: config type = " + cfg.type())
+    res = convert(string, thisCfg)
+    return res
+    
+def b2a(string, cfg):
+    thisCfg = cfg.copy()
+    thisCfg.reverse = True
+    #debug("b2a: config type = " + cfg.type())
+    res = convert(string, thisCfg)
+    return res
 
-def b2a(string):
-    return convert(string,b2aMap)
+
+def debug(string):
+    if do_debug:
+        if string == "":
+            print("", file=sys.stderr)
+        else:
+            print("[%s] %s" % (cmdname, string), file=sys.stderr)
 
 
 def help():
@@ -190,6 +274,7 @@ def help():
     print("   -r for reverse conversion (optional, default: false)", file=sys.stderr)
     print("   -n convert arabic-indic numbers to arabic (optional, default: false)", file=sys.stderr)
     print("   -f force, to fail on error (optional, default: false)", file=sys.stderr)
+    print("   -q quiet, no error messages (optional, default: false)", file=sys.stderr)
     print("", file=sys.stderr)
     print("* Print map table:", file=sys.stderr)
     print("  " + cmdname + " -p", file=sys.stderr)
@@ -197,11 +282,12 @@ def help():
 
 
 def main():        
-    
-    activeMap = a2bMap
 
+    force = False
+    config = Config()
+    
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'rpnf')
+        opts, args = getopt.getopt(sys.argv[1:], 'rpnfq')
     except getopt.GetoptError as err:
         print(err, file=sys.stderr)
         help()
@@ -215,27 +301,39 @@ def main():
             printMapTable()
             sys.exit()
         elif opt in ("-r"):
-            activeMap = b2aMap
+            config.reverse = True
         elif opt in ("-n"):
-            convertNumbers = True
+            config.convertNumbers = True
         elif opt in ("-f"):
             force = True
+        elif opt in ("-q"):
+            config.quiet = True
         
     if len(args) == 0:
         help()
         sys.exit(1)
-            
+
+    if not config.quiet:
+        print("[%s] %s" % (cmdname, config.to_string()))
+        
     for fn in args:
         with open(fn, encoding="utf-8") as f:
             for l in f.readlines():
                 l = l.rstrip()
-                norm, conv, msg, ok = convert(l, activeMap)
-                if ok:
-                    print(l + "\t" + conv)
-                elif force:
-                    print(l + "\t" + conv)
+                if l.strip() == "":
+                    continue
+                if l.strip().startswith("#"):
+                    print("SKIPPING:\t" + l, file=sys.stderr)
+                    continue
+
+                res = convert(l, config)
+                if res.ok:
+                    print(l + "\t" + res.result)
                 else:
-                    print("CONVERSION FAILED\t" + msg + "\t" + l + "\t" + conv, file=sys.stderr)
+                    if not config.quiet:
+                        print("CONVERSION FAILED\tMessage: " + res.msg + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
+                    if force:
+                        print(l + "\t" + res.result)
     return
 
           
