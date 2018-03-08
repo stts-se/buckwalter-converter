@@ -194,6 +194,7 @@ def normalise_bw_input(string):
     return norm
 
 def normalise_ar_input(string):
+    # norm = unicodedata.normalize('NFC', string)
     norm = string
     norm = norm.replace("\u064E\u0651","\u0651\u064E")
     norm = norm.replace("\u0650\u0651","\u0651\u0650")
@@ -202,6 +203,9 @@ def normalise_ar_input(string):
     debug("ar norm output\t%s\t%s" % (norm, unicode_list(norm)))
     return norm
 
+# TODO: reverse direction of diacritics (both ar+bw) to match unicodedata.normalize?
+#       if so, test files need updating as well
+#       example call: unicodedata.normalize('NFC', string)
 def normalise_input(orth, cfg):
     if cfg.reverse:
         return normalise_bw_input(orth)
