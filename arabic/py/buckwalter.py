@@ -42,7 +42,7 @@ class Result:
     input = ""       # Input string
     input_norm = ""  # Normalised input string
     result = ""      # Converted string
-    msg = ""         # Error message, if any
+    msgs = []        # Error messages, if any
     ok = True        # Conversion success True/False
     
     
@@ -240,7 +240,9 @@ def convert(string, cfg, isInnerCall=False):
                 if not is_common_char(ch, cfg):
                     result.ok = False
                     ucode = 'U+%04x' % ord(ch)
-                    result.msg=("Unknown input symbol: %s (%s)" % (ch, ucode))
+                    msg = "Unknown input symbol: %s (%s)" % (ch, ucode)
+                    if not msg in result.msgs:
+                        result.msgs.append(msg)
             else:
                 acc = acc + ch2
 
@@ -335,7 +337,7 @@ def main():
                     print(l + "\t" + res.result)
                 else:
                     if not config.quiet:
-                        print("CONVERSION FAILED\tMessage: " + res.msg + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
+                        print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
                     if force:
                         print(l + "\t" + res.result)
     return
