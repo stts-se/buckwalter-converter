@@ -36,7 +36,7 @@ class Config:
         self.convertNumbers = convertNumbers
         self.reverse = reverse
         self.quiet = quiet
-        
+
     
 class Result:
     input = ""       # Input string
@@ -44,6 +44,19 @@ class Result:
     result = ""      # Converted string
     msgs = []        # Error messages, if any
     ok = True        # Conversion success True/False
+
+    def __str__(self):
+        return self.result
+
+    def json(self):
+        return {
+            'input': self.input,
+            'input_norm': self.input_norm,
+            'result': self.result,
+            'msgs': self.msgs,
+            'ok': self.ok
+        }
+
     
     
 # http://www.qamus.org/transliteration.htm
@@ -251,14 +264,14 @@ def convert(string, cfg, isInnerCall=False):
         msg, ok = reverseTest(result, cfg)
     return result
 
-def a2b(string, cfg):
+def a2b(string, cfg = Config()):
     thisCfg = cfg.copy()
     thisCfg.reverse = False
     #debug("a2b: config type = " + cfg.type())
     res = convert(string, thisCfg)
     return res
     
-def b2a(string, cfg):
+def b2a(string, cfg = Config()):
     thisCfg = cfg.copy()
     thisCfg.reverse = True
     #debug("b2a: config type = " + cfg.type())
