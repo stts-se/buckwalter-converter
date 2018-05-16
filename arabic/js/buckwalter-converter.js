@@ -49,6 +49,12 @@ var bw2araMap = {
     "`": '\u0670', // dagger alif
     "Y": '\u0649', // alif maqsura
 
+    // punctuation
+    ",": "\u060C"
+    ";": "\u061B",
+    "?": "\u061F",
+
+
 };
 
 var commonChars = {
