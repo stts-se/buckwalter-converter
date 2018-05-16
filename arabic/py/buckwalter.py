@@ -292,7 +292,7 @@ def help():
     print("  " + cmdname + " [option] <input files>", file=sys.stderr)
     print("   -r for reverse conversion (optional, default: false)", file=sys.stderr)
     print("   -n convert arabic-indic numbers to arabic (optional, default: false)", file=sys.stderr)
-    print("   -f force, to fail on error (optional, default: false)", file=sys.stderr)
+    print("   -f force, do not halt on error (optional, default: false)", file=sys.stderr)
     print("   -q quiet, no error messages (optional, default: false)", file=sys.stderr)
     print("", file=sys.stderr)
     print("* Print map table:", file=sys.stderr)
@@ -351,8 +351,9 @@ def main():
                 else:
                     if not config.quiet:
                         print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
-                    if force:
-                        print(l + "\t" + res.result)
+                    if not force:
+                        sys.exit(1)
+                        # print(l + "\t" + res.result)
     return
 
           
