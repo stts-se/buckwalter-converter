@@ -50,7 +50,7 @@ var bw2araMap = {
     "Y": '\u0649', // alif maqsura
 
     // punctuation
-    ",": "\u060C"
+    ",": "\u060C",
     ";": "\u061B",
     "?": "\u061F",
 
