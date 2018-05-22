@@ -10,9 +10,10 @@ class Config:
     convertNumbers = True  # Convert Arabic-Indian numerals
     reverse = False        # reverse = Buckwalter to Arabic conversion
     quiet = False          # quiet = no errors or warnings are printed
-
+    column = -1
+    
     def to_string(self):
-        return "config: {convertNumbers=%s, reverse=%s, quiet=%s}" % (self.convertNumbers, self.reverse, self.quiet)
+        return "config: {convertNumbers=%s, reverse=%s, quiet=%s, column=%d}" % (self.convertNumbers, self.reverse, self.quiet, self.column)
 
     def type(self):
         if self.reverse:
@@ -23,6 +24,7 @@ class Config:
     def copy_with_reverse(self, reverse):
         cp = self.copy()
         cp.reverse = reverse
+        cp.column = column
         return cp
         
     def copy(self):
@@ -30,12 +32,14 @@ class Config:
         cp.convertNumbers = self.convertNumbers
         cp.reverse = self.reverse
         cp.quiet = self.quiet
+        cp.column = self.column
         return cp
 
-    def __init__(self, convertNumbers = False, reverse = False, quiet = False):
+    def __init__(self, convertNumbers = False, reverse = False, quiet = False, column = -1):
         self.convertNumbers = convertNumbers
         self.reverse = reverse
         self.quiet = quiet
+        self.column = column
 
     
 class Result:
@@ -295,6 +299,7 @@ def debug(string):
 def help():
     print("* Convert Arabic<=>Buckwalter:", file=sys.stderr)
     print("  " + cmdname + " [option] <input files>", file=sys.stderr)
+    print("   -c convert specified column (optional, default: convert each full line)", file=sys.stderr)
     print("   -r for reverse conversion (optional, default: false)", file=sys.stderr)
     print("   -n convert arabic-indic numbers to arabic (optional, default: false)", file=sys.stderr)
     print("   -f force, do not halt on error (optional, default: false)", file=sys.stderr)
@@ -311,7 +316,7 @@ def main():
     config = Config()
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'rpnfq')
+        opts, args = getopt.getopt(sys.argv[1:], 'rpnfqhc:')
     except getopt.GetoptError as err:
         print(err, file=sys.stderr)
         help()
@@ -332,6 +337,8 @@ def main():
             force = True
         elif opt in ("-q"):
             config.quiet = True
+        elif opt in ("-c"):
+            config.column = int(arg)
         
     if len(args) == 0:
         help()
@@ -345,12 +352,24 @@ def main():
             for l in f.readlines():
                 l = l.rstrip()
                 if l.strip() == "":
+                    print("")
                     continue
                 if l.strip().startswith("#"):
                     print("SKIPPING:\t" + l, file=sys.stderr)
                     continue
+                input_s = ""
+                if config.column  < 0: # column not set - use whole line
+                    input_s = l
+                else:
+                    fs = l.split("\t")
+                    if len(fs) > config.column:
+                        input_s = fs[config.column]
 
-                res = convert(l, config)
+                if input_s == "":
+                    print(l)
+                    continue
+                        
+                res = convert(input_s, config)
                 if res.ok:
                     print(l + "\t" + res.result)
                 else:
