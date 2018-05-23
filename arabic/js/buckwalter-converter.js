@@ -1,7 +1,7 @@
 var BWC = {}
 
 BWC.bw2araMap = {
-    "A": "ا",
+    "A": "ا", // bare alif
     "b": "ب",
     "t": "ت",
     "v": "ث",

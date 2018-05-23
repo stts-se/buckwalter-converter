@@ -72,7 +72,7 @@ class Result:
 # https://en.wikipedia.org/wiki/Buckwalter_transliteration
 
 a2bMap = {
-    "\u0627": "A",
+    "\u0627": "A", # bare alif
     "\u0628": "b",
     "\u062A": "t",
     "\u062B": "v",
