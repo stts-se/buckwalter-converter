@@ -1,4 +1,6 @@
-var bw2araMap = {
+var BWC = {}
+
+BWC.bw2araMap = {
     "A": "ا",
     "b": "ب",
     "t": "ت",
@@ -53,11 +55,9 @@ var bw2araMap = {
     ",": "\u060C",
     ";": "\u061B",
     "?": "\u061F",
+}
 
-
-};
-
-var commonChars = {
+BWC.commonChars = {
     " ": "",
     ".": "",
     ",": "",
@@ -65,90 +65,59 @@ var commonChars = {
     ")": "",
 }
 
-
-function makeAra2bwMap() {
+BWC.makeAra2bwMap = function() {
     var map = {};
-    _.each(bw2araMap, function(ara, bw) {
+    for (var bw in BWC.bw2araMap) {
+	ara = BWC.bw2araMap[bw]
 	map[ara] = bw;
-    });    
+    };    
     return map;
 }
-var ara2bwMap = makeAra2bwMap();
 
-function ViewModel() {
-    buckwalterEdit = ko.observable("");
-    arabicView = ko.computed(function() {
-        return bw2ara(buckwalterEdit());
-    }, this);
+BWC.ara2bwMap = BWC.makeAra2bwMap();
 
-    arabicEdit = ko.observable("");
-    buckwalterView = ko.computed(function() {
-        return ara2bw(arabicEdit());
-    }, this);
-
-    // EDITING STATES
-    bwEditing = ko.observable(true);
-    setBwEditing = function() { 
-	buckwalterEdit(buckwalterView());
-	bwEditing(true); 
-    }
-    setAraEditing = function() { 
-	arabicEdit(arabicView());
-	bwEditing(false); 
-    }
-
-    // SHOW MAPTABLE
-    showMapTable = ko.observable(false);
-    bw2araObservableMap = ko.computed(function() {
-	var thingy = [];
-	for (var k in bw2araMap) {
-	    thingy.push( [k,bw2araMap[k] ]);
-	}
-	return thingy;
-    });
-}
-
-VM = new ViewModel();
-mapTable = VM.mapTable;
-bw2araObservable = VM.bw2araObservable;
-ko.applyBindings(VM);
-
-function bw2ara(bw) {
-    var aras = _.map(bw.trim().split(""), function(sym) {
-	var ara = bw2araMap[sym];
+BWC.bw2ara = function(bw) {
+    var aras = [];
+    //console.log("bw2ara input", bw)
+    syms = bw.trim().split("");
+    for (var i = 0; i < syms.length; i++) {
+	sym = syms[i];
+	var ara = BWC.bw2araMap[sym];
 	if (sym.length> 0 && ara === undefined || ara === null) {
-	    if (commonChars[sym] !== null && commonChars[sym] !== undefined) {
+	    if (BWC.commonChars[sym] !== null && BWC.commonChars[sym] !== undefined) {
 		console.log("/" + sym + "/ is a common char");
-		return sym;
+		aras.push(sym);
 	    } else {		
 		console.log("No mapping for bw symbol /" + sym + "/");
-		return "?";
+		aras.push("?");
 	    }
 	}
 	else {
-	    return ara;
+	    aras.push(ara);
 	}
-    });
-    var res = aras.join("")
-    return res;
-}
+    }
+    return aras.join("");
+};
 
-function ara2bw(ara) {
-    var bws = _.map(ara.trim().split(""), function(sym) {
-	var bw = ara2bwMap[sym];
+BWC.ara2bw = function(ara) {
+    var bws = [];
+    //console.log("ara2bw input", ara)
+    syms = ara.trim().split("");
+    for (var i = 0; i < syms.length; i++) {
+	sym = syms[i];
+	var bw = BWC.ara2bwMap[sym];
 	if (sym.length> 0 && bw === undefined || bw === null) {
-	    if (commonChars[sym] !== null && commonChars[sym] !== undefined) {
+	    if (BWC.commonChars[sym] !== null && BWC.commonChars[sym] !== undefined) {
 		console.log("/" + sym + "/ is a common char");
-		return sym;
+		bws.push(sym);
 	    } else {
 		console.log("No mapping for ara symbol /" + sym + "/");
-		return "?";
+		bws.push("?")
 	    }
 	}
 	else {
-	    return bw;
+	    bws.push(bw);
 	}
-    });
-    var res = bws.join("")
-    return res;
-}
+    }
+    return bws.join("");
+};
