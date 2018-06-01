@@ -5,46 +5,11 @@ import unicodedata
 
 cmdname = "buckwalter"
 do_debug = False
-
-class Config:
-    convertNumbers = True  # Convert Arabic-Indian numerals
-    reverse = False        # reverse = Buckwalter to Arabic conversion
-    quiet = False          # quiet = no errors or warnings are printed
-    column = -1
-    
-    def to_string(self):
-        return "config: {convertNumbers=%s, reverse=%s, quiet=%s, column=%d}" % (self.convertNumbers, self.reverse, self.quiet, self.column)
-
-    def type(self):
-        if self.reverse:
-            return "b2a"
-        else:
-            return "a2b"
-
-    def copy_with_reverse(self, reverse):
-        cp = self.copy()
-        cp.reverse = reverse
-        cp.column = column
-        return cp
-        
-    def copy(self):
-        cp = Config()
-        cp.convertNumbers = self.convertNumbers
-        cp.reverse = self.reverse
-        cp.quiet = self.quiet
-        cp.column = self.column
-        return cp
-
-    def __init__(self, convertNumbers = False, reverse = False, quiet = False, column = -1):
-        self.convertNumbers = convertNumbers
-        self.reverse = reverse
-        self.quiet = quiet
-        self.column = column
-
-    
+force = False
+quiet = False
+ 
 class Result:
     input = ""       # Input string
-    input_norm = ""  # Normalised input string
     result = ""      # Converted string
     msgs = []        # Error messages, if any
     ok = True        # Conversion success True/False
@@ -52,16 +17,40 @@ class Result:
     def __str__(self):
         return self.result
 
-    def json(self):
-        return {
-            'input': self.input,
-            'input_norm': self.input_norm,
-            'result': self.result,
-            'msgs': self.msgs,
-            'ok': self.ok
-        }
+    # def json(self):
+    #     return {
+    #         'input': self.input,
+    #         'result': self.result,
+    #         'msgs': self.msgs,
+    #         'ok': self.ok
+    #     }
 
+
+class char:
+    ar = ""
+    bw = ""
+
+    def __init__(self, ar, bw):
+        self.ar = ar
+        self.bw = bw
     
+    def desc(self):
+        ucode = 'U+%04x' % ord(a)
+        uname = unicodedata.name(a)
+        return "%s %s" % (ucode, uname)
+
+class maptable:
+    fr = ""
+    to = ""
+    table = {}
+
+    def __init__(self, fr, to, table):
+        self.fr = fr
+        self.to = to
+        self.table = table
+
+    def name(self):
+        return "%s2%s" % (self.fr, self.to)
     
 # http://www.qamus.org/transliteration.htm
 #  To make it XML-friendly I would:
@@ -71,221 +60,169 @@ class Result:
 
 # https://en.wikipedia.org/wiki/Buckwalter_transliteration
 
-a2bMap = {
-    "\u0627": "A", # bare alif
-    "\u0628": "b",
-    "\u062A": "t",
-    "\u062B": "v",
-    "\u062C": "j",
-    "\u062D": "H",
-    "\u062E": "x",
-    "\u062F": "d",
-    "\u0630": "*",
-    "\u0631": "r",
-    "\u0632": "z",
-    "\u0633": "s",
-    "\u0634": "$",
-    "\u0635": "S",
-    "\u0636": "D",
-    "\u0637": "T",
-    "\u0638": "Z",
-    "\u0639": "E",
-    "\u063A": "g",
-    "\u0641": "f",
-    "\u0642": "q",
-    "\u0643": "k",
-    "\u0644": "l",
-    "\u0645": "m",
-    "\u0646": "n",
-    "\u0647": "h",
-    "\u0648": "w",
-    "\u064A": "y",
-    "\u0629": "p", #teh marbuta
+chartable = [
+    char("\u0627", "A"), # bare alif
+    char("\u0628", "b"),
+    char("\u062A", "t"),
+    char("\u062B", "v"),
+    char("\u062C", "j"),
+    char("\u062D", "H"),
+    char("\u062E", "x"),
+    char("\u062F", "d"),
+    char("\u0630", "*"),
+    char("\u0631", "r"),
+    char("\u0632", "z"),
+    char("\u0633", "s"),
+    char("\u0634", "$"),
+    char("\u0635", "S"),
+    char("\u0636", "D"),
+    char("\u0637", "T"),
+    char("\u0638", "Z"),
+    char("\u0639", "E"),
+    char("\u063A", "g"),
+    char("\u0641", "f"),
+    char("\u0642", "q"),
+    char("\u0643", "k"),
+    char("\u0644", "l"),
+    char("\u0645", "m"),
+    char("\u0646", "n"),
+    char("\u0647", "h"),
+    char("\u0648", "w"),
+    char("\u064A", "y"),
+    char("\u0629", "p"), #teh marbuta
 
-    "\u064E": "a", # fatha
-    "\u064f": "u", # damma
-    "\u0650": "i", # kasra
-    "\u064B": "F", # fathatayn
-    "\u064C": "N", # dammatayn
-    "\u064D": "K", # kasratayn
-    "\u0651": "~", # shadda
-    "\u0652": "o", # sukun
+    char("\u064E", "a"), # fatha
+    char("\u064f", "u"), # damma
+    char("\u0650", "i"), # kasra
+    char("\u064B", "F"), # fathatayn
+    char("\u064C", "N"), # dammatayn
+    char("\u064D", "K"), # kasratayn
+    char("\u0651", "~"), # shadda
+    char("\u0652", "o"), # sukun
 
-    "\u0621": "'", # lone hamza
-    "\u0623": ">", # hamza on alif
-    "\u0625": "<", # hamza below alif
-    "\u0624": "&", # hamza on wa
-    "\u0626": "}", # hamza on ya
+    char("\u0621", "'"), # lone hamza
+    char("\u0623", ">"), # hamza on alif
+    char("\u0625", "<"), # hamza below alif
+    char("\u0624", "&"), # hamza on wa
+    char("\u0626", "}"), # hamza on ya
     
-    "\u0622": "|", # madda on alif
-    "\u0671": "{", # alif al-wasla
-    "\u0670": "`", # dagger alif
-    "\u0649": "Y", # alif maqsura
+    char("\u0622", "|"), # madda on alif
+    char("\u0671", "{"), # alif al-wasla
+    char("\u0670", "`"), # dagger alif
+    char("\u0649", "Y"), # alif maqsura
 
-    # http://www.qamus.org/transliteration.htm
-    "\u067e": "P", # peh
-    "\u0686": "J", # tcheh
-    "\u06a4": "V", # veh
-    "\u06af": "G", # gaf
-    "\u0640": "_", # tatweel
+    # # http://www.qamus.org/transliteration.htm
+    # char("\u067e", "P"), # peh
+    # char("\u0686", "J"), # tcheh
+    # char("\u06a4", "V"), # veh
+    # char("\u06af", "G"), # gaf
+    # char("\u0640", "_"), # tatweel
 
-    # Arabic-indic digits
-    "\u0660": "0",
-    "\u0661": "1", 
-    "\u0662": "2",
-    "\u0663": "3",
-    "\u0664": "4",
-    "\u0665": "5",
-    "\u0666": "6",
-    "\u0667": "7",
-    "\u0668": "8",
-    "\u0669": "9",
+    # # Arabic-indic digits
+    char("\u0660", "0"),
+    char("\u0661", "1"), 
+    char("\u0662", "2"),
+    char("\u0663", "3"),
+    char("\u0664", "4"),
+    char("\u0665", "5"),
+    char("\u0666", "6"),
+    char("\u0667", "7"),
+    char("\u0668", "8"),
+    char("\u0669", "9"),
 
-    # punctuation
-    "\u060C": ",",
-    "\u061B": ";",
-    "\u061F": "?",
-}
-
-arabicIndicDigits = [
-    "\u0660",
-    "\u0661",
-    "\u0662",
-    "\u0663",
-    "\u0664",
-    "\u0665",
-    "\u0666",
-    "\u0667",
-    "\u0668",
-    "\u0669",
+    # # punctuation
+    char("\u060C", ","),
+    char("\u061B", ";"),
+    char("\u061F", "?"),
 ]
 
-b2aMap = {b: a for a, b in a2bMap.items()}
+a2bMap = maptable("a", "b", {ch.ar: ch.bw for ch in chartable})
+b2aMap = maptable("b", "a", {ch.bw: ch.ar for ch in chartable})
 
 def printMapTable():
-    print("%s\t%s\t%s\t%s" % ("ARABIC", "UNICODE", "UNICODE NAME", "BUCKWALTER"))
-    for a, b in a2bMap.items():
+    print("%s\t%s\t%s" % ("BW", "ARABIC", "DESCRIPTION"))
+    for a, b in a2bMap.table.items():
         ucode = 'U+%04x' % ord(a)
         uname = unicodedata.name(a)
-        print("%s\t%s\t%s\t%s" % (a, ucode, uname, b))
+        print("%s\t%s\t%s %s" % (b, a, ucode, uname))
     return
 
-def reverseTest(testRes, cfg):
-    cfgRev = cfg.copy()
-    if cfgRev.reverse:
-        cfgRev.reverse = False
-    else:
-        cfgRev.reverse = True
-    rev = convert(testRes.result, cfgRev, isInnerCall = True)
-    if rev.result != testRes.input_norm:
-        err = "Reverse test failed!\tReverse %s != Norm %s (Original input %s)" % (rev.result, testRes.input_norm, testRes.input)
+def reverseTest(mapTo, testRes):
+    remaptable = {}
+    if mapTo == a2bMap.to:
+        remaptable = a2bMap
+    elif mapTo == b2aMap.to:
+        remaptable = b2aMap
+        
+    rev = convert(remaptable, testRes.result, False)
+    if rev.result != testRes.input:
+        err = "Reverse test failed!\tReverse %s != Input %s" % (rev.result, testRes.input)
         return err, False
     else:
         return "", True
 
-def unicode_list(string):
-    res = ""
-    for ch in string:
-        try:
-            uc = ('U+%04x' % ord(ch))
-        except getopt.GetoptError as err:
-            print("error for char '%s' : %s" % (ch, err), file=sys.stderr)
-            help()
-            sys.exit(2)
-
-        res = res + " " + uc
-    return res.rstrip()
-
-
-def is_common_char(char, cfg):
-    unum = ord(char)
-    if unum < 128: # ASCII
-        return True
-    elif char == "\u060c": # ARABIC COMMA
-        return True
-    else:
-        return False
-    return
-
-def normalise_bw_input(string):
-    norm = string
-    norm = norm.replace("a~","~a")
-    norm = norm.replace("i~","~i")
-    norm = norm.replace("u~","~u")
-    debug("bw norm: %s => %s" % (string, norm))
-    return norm
-
-def normalise_ar_input(string):
-    # norm = unicodedata.normalize('NFC', string)
-    norm = string
-    norm = norm.replace("\u064E\u0651","\u0651\u064E")
-    norm = norm.replace("\u0650\u0651","\u0651\u0650")
-    norm = norm.replace("\u064f\u0651","\u0651\u064f")    
-    debug("ar norm input:\t%s\t%s"% (string, unicode_list(string)))
-    debug("ar norm output\t%s\t%s" % (norm, unicode_list(norm)))
-    return norm
-
-# TODO: reverse direction of diacritics (both ar+bw) to match unicodedata.normalize?
-#       if so, test files need updating as well
-#       example call: unicodedata.normalize('NFC', string)
-def normalise_input(orth, cfg):
-    if cfg.reverse:
-        return normalise_bw_input(orth)
-    else:
-        return normalise_ar_input(orth)        
-
-def mapTable(cfg):
-    # debug(cfg.type())
-    # debug(cfg.reverse)
-    if cfg.reverse:
-        return b2aMap
-    else:
-        return a2bMap
-    
-def convert(string, cfg, isInnerCall=False):
-    debug(cfg.type())
-    if not isInnerCall:
-        debug("convert: config type = %s" % (cfg.type()))
+def convert(maptable, string, doReverseTest=True):
     result = Result()
-    result.input_norm = normalise_input(string, cfg)
+    result.input = string
     acc = ""
     ok = True
-    for ch in result.input_norm:
-        if ch in arabicIndicDigits and not(cfg.convertNumbers):
-            acc = acc + ch
+    for ch in result.input:
+        ch2 = maptable.table.get(ch,"")
+        if ch2 == "":
+            acc = acc + ch                        
+            if not is_common_char(ch):
+                ok = False
+                ucode = 'U+%04x' % ord(ch)
+                msg = "Unknown input symbol: %s (%s)" % (ch, ucode)
+                if not msg in result.msgs:
+                    result.msgs.append(msg)
         else:
-            debug("CFG TYPE: " + cfg.type())
-            #debug("MAPTABLE %s" % (mapTable(cfg)))
-            ch2 = mapTable(cfg).get(ch,"")
-            if ch2 == "":
-                acc = acc + ch                        
-                if not is_common_char(ch, cfg):
-                    result.ok = False
-                    ucode = 'U+%04x' % ord(ch)
-                    msg = "Unknown input symbol: %s (%s)" % (ch, ucode)
-                    if not msg in result.msgs:
-                        result.msgs.append(msg)
-            else:
-                acc = acc + ch2
+            acc = acc + ch2
 
-    result.result = acc
-    if ok and isInnerCall:
-        msg, ok = reverseTest(result, cfg)
+    result.result = normalise(maptable.to, acc)
+    if ok and doReverseTest:
+        msg, ok = reverseTest(maptable.fr, result)
+        if not msg in result.msgs:
+            result.msgs.append(msg)
+    result.ok = ok
     return result
 
-def a2b(string, cfg = Config()):
-    thisCfg = cfg.copy()
-    thisCfg.reverse = False
-    #debug("a2b: config type = " + cfg.type())
-    res = convert(string, thisCfg)
-    return res
+
+commonChars = {
+    ' ': True,
+    '.': True,
+    ',': True,
+    '(': True,
+    ')': True,
+}
+
+def is_common_char(char):
+    return char in commonChars
+    # unum = ord(char)
+    # if unum < 128: # ASCII
+    #     return True
+    # elif char == "\u060c": # ARABIC COMMA
+    #     return True
+    # else:
+    #     return False
+
+def normalise_bw(string):
+    return re.sub(r'([aiuoFKN])(~)', "\\2\\1", string)
+
+def normalise_ar(string):
+    return unicodedata.normalize('NFC', string)
+
+def normalise(outputName, orth):
+    if outputName == "b":
+        return normalise_bw(orth)
+    else:
+        return normalise_ar(orth)        
+
+def a2b(string):
+    return convert(a2bMap, string)
     
-def b2a(string, cfg = Config()):
-    thisCfg = cfg.copy()
-    thisCfg.reverse = True
-    #debug("b2a: config type = " + cfg.type())
-    res = convert(string, thisCfg)
-    return res
+def b2a(string):
+    return convert(b2aMap, string)
 
 
 def debug(string):
@@ -300,8 +237,7 @@ def help():
     print("* Convert Arabic<=>Buckwalter:", file=sys.stderr)
     print("  " + cmdname + " [option] <input files>", file=sys.stderr)
     print("   -c convert specified column (optional, default: convert each full line)", file=sys.stderr)
-    print("   -r for reverse conversion (optional, default: false)", file=sys.stderr)
-    print("   -n convert arabic-indic numbers to arabic (optional, default: false)", file=sys.stderr)
+    print("   -i input mode a/b (default: a)", file=sys.stderr)
     print("   -f force, do not halt on error (optional, default: false)", file=sys.stderr)
     print("   -q quiet, no error messages (optional, default: false)", file=sys.stderr)
     print("", file=sys.stderr)
@@ -312,11 +248,14 @@ def help():
 
 def main():        
 
-    force = False
-    config = Config()
+    global force
+    global quiet
+    
+    column = -1
+    maptable = a2bMap
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'rpnfqhc:')
+        opts, args = getopt.getopt(sys.argv[1:], 'rpfqhc:')
     except getopt.GetoptError as err:
         print(err, file=sys.stderr)
         help()
@@ -329,24 +268,26 @@ def main():
         elif opt in ("-p"):
             printMapTable()
             sys.exit()
-        elif opt in ("-r"):
-            config.reverse = True
-        elif opt in ("-n"):
-            config.convertNumbers = True
+        elif opt in ("-i"):
+            if arg == a:
+                maptable = a2bMap
+            elif arg == b:
+                maptable == b2aMap
+            else:
+                print("invalid input mode %s" % arg, file=sys.stderr)
+                help()
+                sys.exit(1)
         elif opt in ("-f"):
             force = True
         elif opt in ("-q"):
-            config.quiet = True
+            quiet = True
         elif opt in ("-c"):
-            config.column = int(arg)
+            column = int(arg)
         
     if len(args) == 0:
         help()
         sys.exit(1)
 
-    if not config.quiet:
-        print("[%s] %s" % (cmdname, config.to_string()))
-        
     for fn in args:
         with open(fn, encoding="utf-8") as f:
             for l in f.readlines():
@@ -358,22 +299,22 @@ def main():
                     print("SKIPPING:\t" + l, file=sys.stderr)
                     continue
                 input_s = ""
-                if config.column  < 0: # column not set - use whole line
+                if column  < 0: # column not set - use whole line
                     input_s = l
                 else:
                     fs = l.split("\t")
-                    if len(fs) > config.column:
-                        input_s = fs[config.column]
+                    if len(fs) > column:
+                        input_s = fs[column]
 
                 if input_s == "":
                     print(l)
                     continue
                         
-                res = convert(input_s, config)
+                res = convert(maptable, input_s)
                 if res.ok:
                     print(l + "\t" + res.result)
                 else:
-                    if not config.quiet:
+                    if not quiet:
                         print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
                     if not force:
                         sys.exit(1)
