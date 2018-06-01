@@ -111,14 +111,7 @@ chartable = [
     char("\u0670", "`"), # dagger alif
     char("\u0649", "Y"), # alif maqsura
 
-    # # http://www.qamus.org/transliteration.htm
-    # char("\u067e", "P"), # peh
-    # char("\u0686", "J"), # tcheh
-    # char("\u06a4", "V"), # veh
-    # char("\u06af", "G"), # gaf
-    # char("\u0640", "_"), # tatweel
-
-    # # Arabic-indic digits
+    # Arabic-indic digits
     char("\u0660", "0"),
     char("\u0661", "1"), 
     char("\u0662", "2"),
@@ -130,10 +123,17 @@ chartable = [
     char("\u0668", "8"),
     char("\u0669", "9"),
 
-    # # punctuation
+    # punctuation
     char("\u060C", ","),
     char("\u061B", ";"),
     char("\u061F", "?"),
+
+    # # http://www.qamus.org/transliteration.htm
+    # char("\u067e", "P"), # peh
+    # char("\u0686", "J"), # tcheh
+    # char("\u06a4", "V"), # veh
+    # char("\u06af", "G"), # gaf
+    # char("\u0640", "_"), # tatweel
 ]
 
 a2bMap = maptable("a", "b", {ch.ar: ch.bw for ch in chartable})
@@ -200,8 +200,6 @@ def is_common_char(char):
     return char in commonChars
     # unum = ord(char)
     # if unum < 128: # ASCII
-    #     return True
-    # elif char == "\u060c": # ARABIC COMMA
     #     return True
     # else:
     #     return False
