@@ -99,7 +99,6 @@ def test_strings():
     if not test_accept(inp, exp, res, n_tests):
         n_errs+=1
 
-
     n_tests+=1
     inp = "Hum~uS"
     exp = "\u062D\u064F\u0645\u064F\u0651\u0635"
