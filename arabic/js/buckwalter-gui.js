@@ -2,15 +2,36 @@
 
 var BWG = {}
 
+BWG.toUnicode = function(str) { 
+  var hex = str.charCodeAt(0).toString(16).split('');
+  while(hex.length < 4) hex.splice(0, 0, 0);
+  return '\\u' + hex.join(''); 
+}
+
 BWG.ViewModel = function() {
     buckwalterEdit = ko.observable("");
+    messages = ko.observableArray([])
+
     arabicView = ko.computed(function() {
-        return BWC.bw2ara(buckwalterEdit());
+	let bw = buckwalterEdit();
+	if (bw.length > 0) {
+	    let res = BWC.b2a(bw);
+	    // messages.clear();
+	    // self.messages = res.errors;
+            return res.output;
+	}
     }, this);
 
+    
     arabicEdit = ko.observable("");
     buckwalterView = ko.computed(function() {
-        return BWC.ara2bw(arabicEdit());
+	let ar = arabicEdit();
+	if (ar.length > 0) {
+	    let res = BWC.a2b(ar);
+	    // messages.clear();
+	    // self.messages = res.errors;
+            return res;
+	}
     }, this);
 
     // EDITING STATES
@@ -26,10 +47,11 @@ BWG.ViewModel = function() {
 
     // SHOW MAPTABLE
     showMapTable = ko.observable(false);
-    bw2araObservableMap = ko.computed(function() {
+    b2aObservableMap = ko.computed(function() {
 	var thingy = [];
-	for (var k in BWC.bw2araMap) {
-	    thingy.push( [k,BWC.bw2araMap[k] ]);
+	for (let i = 0; i < BWC.chartable.length; i++) {
+	    ch = BWC.chartable[i];
+	    thingy.push( [ch.bw, ch.ar, BWG.toUnicode(ch.ar) ]);
 	}
 	return thingy;
     });
@@ -37,6 +59,6 @@ BWG.ViewModel = function() {
 
 VM = new BWG.ViewModel();
 mapTable = VM.mapTable;
-bw2araObservable = VM.bw2araObservable;
+b2aObservable = VM.b2aObservable;
 ko.applyBindings(VM);
 

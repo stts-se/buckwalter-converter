@@ -30,17 +30,25 @@
       </table>
     </div>
 
+
+<b>Messages</b>
+Not working! work in progress...
+    <ul data-bind="foreach: messages">
+      <li> <span data-bind="text: $data"> </span> </li>
+    </ul>
+
    <p class="Maptable">
       <div>
    	<b>Show/hide maptable</b> <input type="checkbox" data-bind="checked: showMapTable"/>
    	<table data-bind="visible: showMapTable">
    	  <thead>
-   	    <tr><td><b>Buckwalter</b></td><td><b>Arabic</td></tr>
+   	    <tr><td><b>Buckwalter</b></td><td><b>Arabic</td><td><b>Unicode</td></tr>
    	  </thead>
-   	  <tbody data-bind="foreach: bw2araObservableMap()">
+   	  <tbody data-bind="foreach: b2aObservableMap()">
    	    <tr>
    	      <td><span data-bind="text: $data[0]"></span></td>
    	      <td><span data-bind="text: $data[1]"></span></td>
+	      <td><span data-bind="text: $data[2]"></span></td>
    	    </tr>
    	  </tbody>
    	</table>
