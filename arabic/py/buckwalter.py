@@ -136,8 +136,8 @@ chartable = [
     # char("\u0640", "_"), # tatweel
 ]
 
-a2bMap = maptable("a", "b", {ch.ar: ch.bw for ch in chartable})
-b2aMap = maptable("b", "a", {ch.bw: ch.ar for ch in chartable})
+a2bMap = maptable("ar", "bw", {ch.ar: ch.bw for ch in chartable})
+b2aMap = maptable("bw", "ar", {ch.bw: ch.ar for ch in chartable})
 
 def printMapTable():
     print("%s\t%s\t%s" % ("BW", "ARABIC", "DESCRIPTION"))
@@ -147,45 +147,46 @@ def printMapTable():
         print("%s\t%s\t%s %s" % (b, a, ucode, uname))
     return
 
-def reverseTest(mapTo, testRes):
+def reverseTest(mapTo, result):
     remaptable = {}
     if mapTo == a2bMap.to:
         remaptable = a2bMap
     elif mapTo == b2aMap.to:
         remaptable = b2aMap
         
-    rev = convert(remaptable, testRes.result, False)
-    if rev.result != testRes.input:
-        err = "Reverse test failed!\tReverse %s != Input %s" % (rev.result, testRes.input)
+    rev = convert(remaptable, result.result, False)
+    if rev.result != result.input:
+        err = "Reverse test failed!\tReverse %s != Input %s" % (rev.result, result.input)
         return err, False
     else:
         return "", True
 
 def convert(maptable, string, doReverseTest=True):
-    result = Result()
-    result.input = string
+    res = Result()
+    res.input = string
     acc = ""
-    ok = True
-    for ch in result.input:
+    res.ok = True
+    for ch in res.input:
         ch2 = maptable.table.get(ch,"")
         if ch2 == "":
             acc = acc + ch                        
             if not is_common_char(ch):
-                ok = False
+                res.ok = False
                 ucode = 'U+%04x' % ord(ch)
                 msg = "Unknown input symbol: %s (%s)" % (ch, ucode)
-                if not msg in result.msgs:
-                    result.msgs.append(msg)
+                if not msg in res.msgs:
+                    res.msgs.append(msg)
         else:
             acc = acc + ch2
 
-    result.result = normalise(maptable.to, acc)
-    if ok and doReverseTest:
-        msg, ok = reverseTest(maptable.fr, result)
-        if not msg in result.msgs:
-            result.msgs.append(msg)
-    result.ok = ok
-    return result
+    res.result = normalise(maptable.to, acc)
+    if res.ok and doReverseTest:
+        msg, ok = reverseTest(maptable.fr, res)
+        if not ok:
+            res.ok = False
+        if not msg in res.msgs:
+            res.msgs.append(msg)
+    return res
 
 
 commonChars = {
@@ -196,14 +197,16 @@ commonChars = {
     ')': True,
 }
 
-def is_common_char(char):
-    return char in commonChars
-    # unum = ord(char)
-    # if unum < 128: # ASCII
-    #     return True
-    # else:
-    #     return False
+alwaysAcceptAscii = False
 
+def is_common_char(char):
+    if char in commonChars:
+        return True
+    if alwaysAcceptAscii:
+        if ord(char) < 128: # ASCII
+            return True
+    return False
+     
 def normalise_bw(string):
     return re.sub(r'([aiuoFKN])(~)', "\\2\\1", string)
 
@@ -211,7 +214,7 @@ def normalise_ar(string):
     return unicodedata.normalize('NFC', string)
 
 def normalise(outputName, orth):
-    if outputName == "b":
+    if outputName == "bw":
         return normalise_bw(orth)
     else:
         return normalise_ar(orth)        

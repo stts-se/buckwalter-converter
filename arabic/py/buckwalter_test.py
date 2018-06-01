@@ -55,9 +55,9 @@ errFmt = "for test no %s, expected '%s', got '%s'"
 
 def test_accept(inp, exp, res, test_no):
     if not res.ok:
-        print("didn't expect error for test %s! got %s" % (test_no, "; ".join(res.msgs)), sys.stderr)
+        print("didn't expect error for test no %s, input %s! Found %s" % (test_no, inp, "; ".join(res.msgs)), file=sys.stderr)
         return False
-    elif res.result != exp:
+    elif not res.result == exp:
         print(errFmt % (test_no, exp, res.result), file=sys.stderr)
         return False
     else:
@@ -107,6 +107,13 @@ def test_strings():
         n_errs+=1
 
     n_tests+=1
+    inp = "Humu~S"
+    exp = "\u062D\u064F\u0645\u064F\u0651\u0635"
+    res = buckwalter.b2a(inp)
+    if not test_fail(inp, exp, res, n_tests):
+        n_errs+=1
+
+    n_tests+=1
     inp = "\u062D\u064F\u0645\u064F\u0651\u0635"
     exp = "Hum~uS"
     res = buckwalter.a2b(inp)
@@ -116,6 +123,13 @@ def test_strings():
     n_tests+=1
     inp = "\u062D\u064F\u0645\u0651\u064F\u0635"
     exp = "Hum~uS"
+    res = buckwalter.a2b(inp)
+    if not test_fail(inp, exp, res, n_tests):
+        n_errs+=1
+
+    n_tests+=1
+    inp = "\u062D\u064F\u0645m"
+    exp = "Humm"
     res = buckwalter.a2b(inp)
     if not test_fail(inp, exp, res, n_tests):
         n_errs+=1
@@ -180,6 +194,6 @@ def test_file(maptable, input_file):
     print("%s tests fail" % (n_errs), file=sys.stderr)
     print("", file=sys.stderr)
     
-test_file(buckwalter.a2bMap, "test_data/test_a2b.txt" )
-test_file(buckwalter.b2aMap, "test_data/test_b2a.txt")
+#test_file(buckwalter.a2bMap, "test_data/test_a2b.txt" )
+#test_file(buckwalter.b2aMap, "test_data/test_b2a.txt")
 test_strings()
