@@ -101,7 +101,7 @@ BWC.commonChars = {
 BWC.alwaysAcceptASCII = true;
 
 BWC.isCommonChar = function(sym) {
-    // ALL ASCII CHARS? CHAR NUM <128
+    // ALL ASCII CHARS? CHAR NUM <128; WITH THIS, REVERSE TEST WON'T WORK
     if (BWC.commonChars[sym] !== null && BWC.commonChars[sym] !== undefined)
 	return true;
     num = sym.charCodeAt(0);
@@ -147,7 +147,7 @@ BWC.reverseTest = function(mapTo, input, result) {
 
     let rev = BWC.convert(remaptable, result, false);
     if (rev.output !== input) {
-        let err = "Reverse test failed!\tReverse " + rev.output + " != Input " + input;
+        let err = "Reverse test failed: input " + input + " != reverse " + rev.output;
 	return err;
     }
     else
@@ -180,10 +180,10 @@ BWC.convert = function(maptable, input, doReverseTest) {
     let mapped = res.join("");
     mapped = BWC.normalise(maptable.to, mapped)
     
-    if (doReverseTest) {
+    if (errs.length == 0 && doReverseTest) {
 	let err = BWC.reverseTest(maptable.from, input, mapped)
 	if (err !== null) {
-	    errs.push("found errors in remapping test: " + err)
+	    errs.push(err)
 	}
     }
     let r = new BWResult(mapped, errs, ok);

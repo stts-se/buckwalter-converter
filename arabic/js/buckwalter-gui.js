@@ -14,10 +14,11 @@ BWG.ViewModel = function() {
 
     arabicView = ko.computed(function() {
 	let bw = buckwalterEdit();
-	if (bw.length > 0) {
+	if (bw != null && bw.length > 0) {
 	    let res = BWC.b2a(bw);
-	    // messages.clear();
-	    // self.messages = res.errors;
+	    messages(res.errors);
+	    // console.log(res.errors);
+	    // console.log(messages());
             return res.output;
 	}
     }, this);
@@ -26,11 +27,12 @@ BWG.ViewModel = function() {
     arabicEdit = ko.observable("");
     buckwalterView = ko.computed(function() {
 	let ar = arabicEdit();
-	if (ar.length > 0) {
+	if (ar != null && ar.length > 0) {
 	    let res = BWC.a2b(ar);
-	    // messages.clear();
-	    // self.messages = res.errors;
-            return res;
+	    messages(res.errors);
+	    // console.log(res.errors);
+	    // console.log(messages());
+            return res.output;
 	}
     }, this);
 
