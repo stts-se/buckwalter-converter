@@ -77,7 +77,7 @@ BWC.chartable = [
 ];
 
 BWC.normalise_bw = function(s) {
-    return s.replace(/([aiuoFKN])(~)/g, "$2¡1", s);
+    return s.replace(/([aiuoFKN])(~)/g, "$2$1", s);
 }
 
 BWC.normalise_ar = function(s) {
@@ -162,9 +162,11 @@ BWC.convert = function(maptable, input, doReverseTest) {
     for (let i = 0; i < input.length; i++) {
 	let sym = input[i];
 	let sym2 = maptable.table[sym];
+	// console.log("sym", sym);
+	// console.log("sym2", sym2);
 	if (sym.length > 0 && (sym2 === undefined || sym2 === null)) {
 	    if (BWC.isCommonChar(sym)) {
-		//console.log("/" + sym + "/ is a common char");
+		// console.log("/" + sym + "/ is a common char");
 		res.push(sym);
 	    } else {
 		res.push(BWC.defaultChar);
