@@ -16,6 +16,8 @@ class BWMaptable {
 }
 
 
+BWC.defaultChar = "?";
+
 BWC.chartable = [
     new BWChar("ا", "A"), // bare alif
     new BWChar("ب", "b"),
@@ -98,15 +100,14 @@ BWC.commonChars = {
     ")": "",
 }
 
-BWC.alwaysAcceptASCII = true;
+BWC.alwaysAcceptASCII = false;
 
 BWC.isCommonChar = function(sym) {
-    // ALL ASCII CHARS? CHAR NUM <128; WITH THIS, REVERSE TEST WON'T WORK
     if (BWC.commonChars[sym] !== null && BWC.commonChars[sym] !== undefined)
 	return true;
-    num = sym.charCodeAt(0);
-    if (num < 128) {
-	return true;
+    // ALL ASCII CHARS? CHAR NUM <128; WITH THIS, REVERSE TEST WON'T WORK
+    if (BWC.alwaysAcceptASCII && sym.charCodeAt(0) < 128) {
+    	return true;
     }
     return false;
 }
@@ -160,19 +161,19 @@ BWC.convert = function(maptable, input, doReverseTest) {
     let errs = [];    
     for (let i = 0; i < input.length; i++) {
 	let sym = input[i];
-	let ar = maptable.table[sym];
-	if (sym.length> 0 && ar === undefined || ar === null) {
+	let sym2 = maptable.table[sym];
+	if (sym.length > 0 && (sym2 === undefined || sym2 === null)) {
 	    if (BWC.isCommonChar(sym)) {
 		//console.log("/" + sym + "/ is a common char");
 		res.push(sym);
 	    } else {
-		res.push("?");
+		res.push(BWC.defaultChar);
 		let msg = "No mapping for " + maptable.from + " symbol '" + sym + "'";
 		errs.push(msg);
 	    }
 	}
 	else {
-	    res.push(ar);
+	    res.push(sym2);
 	}
     }
 

@@ -13,6 +13,7 @@ BWG.ViewModel = function() {
     messages = ko.observableArray([])
 
     arabicView = ko.computed(function() {
+	messages([]);
 	let bw = buckwalterEdit();
 	if (bw != null && bw.length > 0) {
 	    let res = BWC.b2a(bw);
@@ -26,6 +27,7 @@ BWG.ViewModel = function() {
     
     arabicEdit = ko.observable("");
     buckwalterView = ko.computed(function() {
+	messages([]);
 	let ar = arabicEdit();
 	if (ar != null && ar.length > 0) {
 	    let res = BWC.a2b(ar);
