@@ -88,8 +88,7 @@ BWC.normalise = function(outputName, orth) {
     if (outputName === "bw")
         return BWC.normalise_bw(orth);
     else
-        return BWC.normalise_ar(orth);        
-
+        return BWC.normalise_ar(orth);
 }
 
 BWC.commonChars = {
