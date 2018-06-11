@@ -98,9 +98,17 @@ BWC.commonChars = {
     ",": "",
     "(": "",
     ")": "",
-}
+};
 
 BWC.alwaysAcceptASCII = false;
+
+BWC.addCommonChar = function(sym) {
+    BWC.commonChars[sym] = "";
+}
+
+BWC.removeCommonChar = function(sym) {
+  delete BWC.commonChars[sym];
+}
 
 BWC.isCommonChar = function(sym) {
     if (BWC.commonChars[sym] !== null && BWC.commonChars[sym] !== undefined)
