@@ -177,7 +177,7 @@ BWC.convert = function(maptable, input, doReverseTest) {
 		res.push(sym);
 	    } else {
 		res.push(BWC.defaultChar);
-		let msg = "No mapping for " + maptable.from + " symbol '" + sym + "'";
+		let msg = "Invalid " + maptable.from + " input symbol '" + sym + "'";
 		errs.push(msg);
 	    }
 	}
