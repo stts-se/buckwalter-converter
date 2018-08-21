@@ -195,6 +195,7 @@ commonChars = {
     ',': True,
     '(': True,
     ')': True,
+    '/': True,
 }
 
 alwaysAcceptAscii = False
