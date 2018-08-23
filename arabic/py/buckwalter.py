@@ -190,12 +190,28 @@ def convert(maptable, string, doReverseTest=True):
 
 
 commonChars = {
+    # '1': True,
+    # '2': True,
+    # '3': True,
+    # '4': True,
+    # '5': True,
+    # '6': True,
+    # '7': True,
+    # '8': True,
+    # '9': True,
+    # '0': True,
     ' ': True,
     '.': True,
     ',': True,
     '(': True,
     ')': True,
     '/': True,
+    '<': True,
+    '>': True,
+    '[': True,
+    ']': True,
+    ':': True,
+    '-': True,
 }
 
 alwaysAcceptAscii = False
@@ -320,7 +336,7 @@ def main():
                         print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
                     if not force:
                         sys.exit(1)
-                        # print(l + "\t" + res.result)
+                    print(l + "\t" + res.result)
     return
 
           
