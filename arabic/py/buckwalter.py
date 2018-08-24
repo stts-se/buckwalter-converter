@@ -14,16 +14,14 @@ class Result:
     msgs = []        # Error messages, if any
     ok = True        # Conversion success True/False
 
+    def __init__(self):
+        self.input = ""
+        self.result = ""
+        self.msgs = []
+        self.ok = True
+    
     def __str__(self):
         return self.result
-
-    # def json(self):
-    #     return {
-    #         'input': self.input,
-    #         'result': self.result,
-    #         'msgs': self.msgs,
-    #         'ok': self.ok
-    #     }
 
 
 class char:
@@ -156,7 +154,7 @@ def reverseTest(mapTo, result):
         
     rev = convert(remaptable, result.result, False)
     if rev.result != result.input:
-        err = "Reverse test failed!\tReverse %s != Input %s" % (rev.result, result.input)
+        err = "Reverse test failed! reverse %s != input %s" % (rev.result, result.input)
         return err, False
     else:
         return "", True
@@ -173,7 +171,9 @@ def convert(maptable, string, doReverseTest=True):
             if not is_common_char(ch):
                 res.ok = False
                 ucode = 'U+%04x' % ord(ch)
-                msg = "Unknown input symbol: %s (%s)" % (ch, ucode)
+                #print(res.msgs)
+                #print(ch)
+                msg = "Unknown symbol: %s (%s)" % (ch, ucode)
                 if not msg in res.msgs:
                     res.msgs.append(msg)
         else:
