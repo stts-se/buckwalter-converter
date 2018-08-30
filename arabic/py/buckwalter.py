@@ -2,6 +2,7 @@ import re
 import sys
 import getopt
 import unicodedata
+import select
 
 cmdname = "buckwalter"
 do_debug = False
@@ -212,6 +213,7 @@ commonChars = {
     ']': True,
     ':': True,
     '-': True,
+    '\t': True,
 }
 
 alwaysAcceptAscii = False
@@ -251,6 +253,36 @@ def debug(string):
             print("[%s] %s" % (cmdname, string), file=sys.stderr)
 
 
+def convert_line(maptable, column, l):
+    l = l.rstrip()
+    if l.strip() == "":
+        print("")
+        return
+    if l.strip().startswith("#"):
+        print("SKIPPING:\t" + l, file=sys.stderr)
+        return
+    input_s = ""
+    if column  < 0: # column not set - use whole line
+        input_s = l
+    else:
+        fs = l.split("\t")
+        if len(fs) > column:
+            input_s = fs[column]
+
+    if input_s == "":
+        print(l)
+        return
+
+    res = convert(maptable, input_s)
+    if res.ok:
+        print(l + "\t" + res.result)
+    else:
+        if not quiet:
+            print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
+        if not force:
+            sys.exit(1)
+        print(l + "\t" + res.result)
+
 def help():
     print("* Convert Arabic<=>Buckwalter:", file=sys.stderr)
     print("  " + cmdname + " [option] <input files>", file=sys.stderr)
@@ -273,7 +305,7 @@ def main():
     maptable = a2bMap
     
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'rpfqhc:')
+        opts, args = getopt.getopt(sys.argv[1:], 'i:pfqhc:')
     except getopt.GetoptError as err:
         print(err, file=sys.stderr)
         help()
@@ -287,10 +319,10 @@ def main():
             printMapTable()
             sys.exit()
         elif opt in ("-i"):
-            if arg == a:
+            if arg == "a":
                 maptable = a2bMap
-            elif arg == b:
-                maptable == b2aMap
+            elif arg == "b":
+                maptable = b2aMap
             else:
                 print("invalid input mode %s" % arg, file=sys.stderr)
                 help()
@@ -302,41 +334,19 @@ def main():
         elif opt in ("-c"):
             column = int(arg)
         
-    if len(args) == 0:
+    if select.select([sys.stdin,],[],[],0.0)[0]:
+        for line in sys.stdin:
+            convert_line(maptable, column, line)
+
+    elif len(args) == 0:
         help()
         sys.exit(1)
-
-    for fn in args:
-        with open(fn, encoding="utf-8") as f:
-            for l in f.readlines():
-                l = l.rstrip()
-                if l.strip() == "":
-                    print("")
-                    continue
-                if l.strip().startswith("#"):
-                    print("SKIPPING:\t" + l, file=sys.stderr)
-                    continue
-                input_s = ""
-                if column  < 0: # column not set - use whole line
-                    input_s = l
-                else:
-                    fs = l.split("\t")
-                    if len(fs) > column:
-                        input_s = fs[column]
-
-                if input_s == "":
-                    print(l)
-                    continue
-                        
-                res = convert(maptable, input_s)
-                if res.ok:
-                    print(l + "\t" + res.result)
-                else:
-                    if not quiet:
-                        print("CONVERSION FAILED\tMessage: " + "; ".join(res.msgs) + "\tInput: " + l + "\tResult: " + res.result, file=sys.stderr)
-                    if not force:
-                        sys.exit(1)
-                    print(l + "\t" + res.result)
+        
+    else:
+        for fn in args:
+            with open(fn, encoding="utf-8") as f:
+                for l in f.readlines():
+                    convert_line(maptable, column, l)
     return
 
           
