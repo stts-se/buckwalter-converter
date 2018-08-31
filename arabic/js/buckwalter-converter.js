@@ -88,7 +88,6 @@ BWC.post_normalise_ar = function(s) {
 BWC.pre_normalise_ar = function(s) {
     let res = s;
     res = res.replace('\uFEAA','\u062F');  // DAL FINAL FORM => DAL
-    console.log(res);
     return res;
 }
 
@@ -104,7 +103,6 @@ BWC.post_normalise = function(outputName, orth) {
 }
 
 BWC.pre_normalise = function(inputName, orth) {
-    console.log("pre_normalise", inputName, orth);
     if (inputName === "bw")
         return BWC.pre_normalise_bw(orth);
     else
