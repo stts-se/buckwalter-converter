@@ -134,6 +134,15 @@ def test_strings():
     if not test_fail(inp, exp, res, n_tests):
         n_errs+=1
 
+
+    n_tests+=1
+    inp = "\u062D\u0645\u0648\uFEAA"
+    exp = "Hmwd"
+    res = buckwalter.a2b(inp)
+    if not test_accept(inp, exp, res, n_tests):
+        n_errs+=1
+
+        
         
     print("test_strings", file=sys.stderr)
     print("%s tests run" % (n_tests), file=sys.stderr)

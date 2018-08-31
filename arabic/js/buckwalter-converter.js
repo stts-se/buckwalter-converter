@@ -76,19 +76,39 @@ BWC.chartable = [
 
 ];
 
-BWC.normalise_bw = function(s) {
+BWC.post_normalise_bw = function(s) {
     return s.replace(/([aiuoFKN])(~)/g, "$2$1", s);
 }
 
-BWC.normalise_ar = function(s) {
-    return s.normalize('NFC').replace('\uFEAA','\u062F');  // DAL FINAL FORM => DAL
+BWC.post_normalise_ar = function(s) {
+    let res = s.normalize('NFC');
+    return res;
 }
 
-BWC.normalise = function(outputName, orth) {
+BWC.pre_normalise_ar = function(s) {
+    let res = s;
+    res = res.replace('\uFEAA','\u062F');  // DAL FINAL FORM => DAL
+    console.log(res);
+    return res;
+}
+
+BWC.pre_normalise_bw = function(s) {
+    return s;
+}
+
+BWC.post_normalise = function(outputName, orth) {
     if (outputName === "bw")
-        return BWC.normalise_bw(orth);
+        return BWC.post_normalise_bw(orth);
     else
-        return BWC.normalise_ar(orth);
+        return BWC.post_normalise_ar(orth);
+}
+
+BWC.pre_normalise = function(inputName, orth) {
+    console.log("pre_normalise", inputName, orth);
+    if (inputName === "bw")
+        return BWC.pre_normalise_bw(orth);
+    else
+        return BWC.pre_normalise_ar(orth);
 }
 
 BWC.commonChars = {
@@ -164,6 +184,7 @@ BWC.reverseTest = function(mapTo, input, result) {
 
 BWC.convert = function(maptable, input, doReverseTest) {
     //console.log("convert called with '" + input + "'");
+    input = BWC.pre_normalise(maptable.from, input);
     let res = [];
     let errs = [];    
     for (let i = 0; i < input.length; i++) {
@@ -188,7 +209,7 @@ BWC.convert = function(maptable, input, doReverseTest) {
 
     let ok = (errs.length > 0); 
     let mapped = res.join("");
-    mapped = BWC.normalise(maptable.to, mapped)
+    mapped = BWC.post_normalise(maptable.to, mapped)
     
     if (errs.length == 0 && doReverseTest) {
 	let err = BWC.reverseTest(maptable.from, input, mapped)

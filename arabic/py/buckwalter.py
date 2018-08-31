@@ -162,7 +162,7 @@ def reverseTest(mapTo, result):
 
 def convert(maptable, string, doReverseTest=True):
     res = Result()
-    res.input = string
+    res.input = pre_normalise(maptable.fr, string)
     acc = ""
     res.ok = True
     for ch in res.input:
@@ -180,7 +180,7 @@ def convert(maptable, string, doReverseTest=True):
         else:
             acc = acc + ch2
 
-    res.result = normalise(maptable.to, acc)
+    res.result = post_normalise(maptable.to, acc)
     if res.ok and doReverseTest:
         msg, ok = reverseTest(maptable.fr, res)
         if not ok:
@@ -226,17 +226,32 @@ def is_common_char(char):
             return True
     return False
      
-def normalise_bw(string):
+def post_normalise_bw(string):
     return re.sub(r'([aiuoFKN])(~)', "\\2\\1", string)
 
-def normalise_ar(string):
-    return unicodedata.normalize('NFC', string).replace('\uFEAA','\u062F') # DAL FINAL FORM => DAL
+def post_normalise_ar(string):
+    res = unicodedata.normalize('NFC', string)
+    return res
 
-def normalise(outputName, orth):
+def pre_normalise_bw(string):
+    return string
+
+def pre_normalise_ar(string):
+    res = string
+    res = res.replace('\uFEAA','\u062F') # DAL FINAL FORM => DAL
+    return res
+
+def post_normalise(outputName, orth):
     if outputName == "bw":
-        return normalise_bw(orth)
+        return post_normalise_bw(orth)
     else:
-        return normalise_ar(orth)        
+        return post_normalise_ar(orth)        
+
+def pre_normalise(inputName, orth):
+    if inputName == "bw":
+        return pre_normalise_bw(orth)
+    else:
+        return pre_normalise_ar(orth)        
 
 def a2b(string):
     return convert(a2bMap, string)
