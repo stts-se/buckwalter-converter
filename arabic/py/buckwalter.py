@@ -67,7 +67,7 @@ chartable = [
     char("\u062C", "j"),
     char("\u062D", "H"),
     char("\u062E", "x"),
-    char("\u062F", "d"),
+    char("\u062F", "d"), # dal
     char("\u0630", "*"),
     char("\u0631", "r"),
     char("\u0632", "z"),
@@ -230,7 +230,7 @@ def normalise_bw(string):
     return re.sub(r'([aiuoFKN])(~)', "\\2\\1", string)
 
 def normalise_ar(string):
-    return unicodedata.normalize('NFC', string)
+    return unicodedata.normalize('NFC', string).replace('\uFEAA','\u062F') # DAL FINAL FORM => DAL
 
 def normalise(outputName, orth):
     if outputName == "bw":

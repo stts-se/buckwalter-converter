@@ -26,7 +26,7 @@ BWC.chartable = [
     new BWChar("ج", "j"),
     new BWChar("ح", "H"),
     new BWChar("خ", "x"),
-    new BWChar("د", "d"),
+    new BWChar("د", "d"), // dal
     new BWChar("ذ", "*"),
     new BWChar("ر", "r"),
     new BWChar("ز", "z"),
@@ -81,7 +81,7 @@ BWC.normalise_bw = function(s) {
 }
 
 BWC.normalise_ar = function(s) {
-    return s.normalize('NFC');
+    return s.normalize('NFC').replace('\uFEAA','\u062F');  // DAL FINAL FORM => DAL
 }
 
 BWC.normalise = function(outputName, orth) {
