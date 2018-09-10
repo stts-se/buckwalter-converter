@@ -87,7 +87,8 @@ BWC.post_normalise_ar = function(s) {
 
 BWC.pre_normalise_ar = function(s) {
     let res = s;
-    res = res.replace('\uFEAA','\u062F');  // DAL FINAL FORM => DAL
+    res = res.replace('\uFEAA','\u062F');   // DAL FINAL FORM => DAL
+    res = res.replace('\u200F', '')         // RTL MARK
     return res;
 }
 

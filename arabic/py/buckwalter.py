@@ -239,6 +239,7 @@ def pre_normalise_bw(string):
 def pre_normalise_ar(string):
     res = string
     res = res.replace('\uFEAA','\u062F') # DAL FINAL FORM => DAL
+    res = res.replace("\u200F", "")      # RTL MARK
     return res
 
 def post_normalise(outputName, orth):
