@@ -127,15 +127,12 @@ chartable = [
     char("\u061B", ";"),
     char("\u061F", "?"),
 
-    # # http://www.qamus.org/transliteration.htm
-    # char("\u067e", "P"), # peh
-    # char("\u0686", "J"), # tcheh
-    # char("\u06a4", "V"), # veh
-    # char("\u06af", "G"), # gaf
+    # http://www.qamus.org/transliteration.htm
+    char("\u067e", "P"), # peh
+    char("\u0686", "J"), # tcheh
+    char("\u06a4", "V"), # veh
+    char("\u06af", "G"), # gaf
     # char("\u0640", "_"), # tatweel
-
-    # addons
-    char("\u067E", "P"),
 
 ]
 
