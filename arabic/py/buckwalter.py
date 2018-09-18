@@ -133,6 +133,10 @@ chartable = [
     # char("\u06a4", "V"), # veh
     # char("\u06af", "G"), # gaf
     # char("\u0640", "_"), # tatweel
+
+    # addons
+    char("\u067E", "P"),
+
 ]
 
 a2bMap = maptable("ar", "bw", {ch.ar: ch.bw for ch in chartable})
@@ -238,8 +242,9 @@ def pre_normalise_bw(string):
 
 def pre_normalise_ar(string):
     res = string
-    res = res.replace('\uFEAA','\u062F') # DAL FINAL FORM => DAL
-    res = res.replace("\u200F", "")      # RTL MARK
+    res = res.replace('\uFEAA','\u062F')  # DAL FINAL FORM => DAL
+    res = res.replace("\u06BE", "\u0647") # HEH DOACHASHMEE => HEH
+    res = res.replace("\u200F", "")       # RTL MARK
     return res
 
 def post_normalise(outputName, orth):

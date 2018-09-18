@@ -74,6 +74,8 @@ BWC.chartable = [
     new BWChar("\u061B", ";"),
     new BWChar("\u061F", "?"),
 
+    // addons
+    new BWChar("\u067E", "P"),
 ];
 
 BWC.post_normalise_bw = function(s) {
@@ -88,6 +90,7 @@ BWC.post_normalise_ar = function(s) {
 BWC.pre_normalise_ar = function(s) {
     let res = s;
     res = res.replace('\uFEAA','\u062F');   // DAL FINAL FORM => DAL
+    res = res.replace("\u06BE", "\u0647")   // HEH DOACHASHMEE => HEH
     res = res.replace('\u200F', '')         // RTL MARK
     return res;
 }
