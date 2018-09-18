@@ -74,8 +74,11 @@ BWC.chartable = [
     new BWChar("\u061B", ";"),
     new BWChar("\u061F", "?"),
 
-    // addons
-    new BWChar("\u067E", "P"),
+    // http://www.qamus.org/transliteration.htm
+    new BWChar("\u067e", "P"), // peh
+    new BWChar("\u0686", "J"), // tcheh
+    new BWChar("\u06a4", "V"), // veh
+    new BWChar("\u06af", "G"), // gaf
 ];
 
 BWC.post_normalise_bw = function(s) {
