@@ -79,6 +79,7 @@ BWC.chartable = [
     new BWChar("\u0686", "J"), // tcheh
     new BWChar("\u06a4", "V"), // veh
     new BWChar("\u06af", "G"), // gaf
+    new BWChar("\u0640", "_"), // tatweel
 ];
 
 BWC.post_normalise_bw = function(s) {
