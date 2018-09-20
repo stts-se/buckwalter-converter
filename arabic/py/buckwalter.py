@@ -132,7 +132,7 @@ chartable = [
     char("\u0686", "J"), # tcheh
     char("\u06a4", "V"), # veh
     char("\u06af", "G"), # gaf
-    char("\u0640", "_"), # tatweel
+    # char("\u0640", "_"), # tatweel
 
 ]
 
