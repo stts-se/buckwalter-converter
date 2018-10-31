@@ -118,6 +118,7 @@ BWC.pre_normalise = function(inputName, orth) {
 }
 
 BWC.commonChars = {
+    '\u00A0': "", // non-breaking space
     " ": "",
     ".": "",
     ",": "",

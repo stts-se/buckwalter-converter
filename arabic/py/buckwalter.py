@@ -202,6 +202,7 @@ commonChars = {
     # '8': True,
     # '9': True,
     # '0': True,
+    '\u00A0': True, # non-breaking space
     ' ': True,
     '.': True,
     ',': True,
