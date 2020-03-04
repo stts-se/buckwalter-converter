@@ -1,5 +1,7 @@
 Utilities for transliteration of Arabic and Farsi text
 
+_NB! This repo is deprecated -- use https://github.com/stts-se/translit instead!_
+
 
 ## Arabic | Buckwalter
 
